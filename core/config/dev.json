@@ -1,0 +1,5 @@
+{
+  "DB_DRIVER": "localhost",
+  "DB_SOURCE": "8080",
+  "SERVER_ADDRESS": "localhost1"
+}

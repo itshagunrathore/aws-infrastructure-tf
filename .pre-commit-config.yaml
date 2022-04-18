@@ -38,7 +38,13 @@ repos:
     hooks:
       - id: git-check     # check for git conflict markers and whitespace errors - uses git internally
 
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.42.1
-    hooks:
-      - id: golangci-lint
+  # - repo: https://github.com/golangci/golangci-lint
+  #   rev: v1.42.1
+  #   hooks:
+  #     - id: golangci-lint
+  #       name: golangci-lint
+  #       description: Fast linters runner for Go.
+  #       entry: golangci-lint run --fix
+  #       types: [go]
+  #       language: golang
+  #       pass_filenames: false
