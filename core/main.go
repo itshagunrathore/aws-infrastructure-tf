@@ -4,13 +4,23 @@ import (
 	"fmt"
 	"os"
 
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/handlers"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/services"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/models"
 )
 
 func main() {
-	handlers.HandleLogging()
-	services.HandleService()
+
+	var cfg *models.Configurations
+	config.ReadConfigInto(&cfg)
+	fmt.Println(cfg)
+
+	fmt.Println("printing configuration values: ", cfg.DbConfig.Host)
+	fmt.Println(cfg.DbConfig.Username)
+	fmt.Println(cfg.DbConfig.Password)
+	fmt.Println(cfg.DbConfig.SSLEnabled)
+	// postgresDb := db.NewDBConnection(cfg.DBConfig)
+	// handlers.HandleLogging()
+	// services.HandleService()
 	// fmt.Printf("Running project: `%s`\n", src.ProjectName())
 
 	// These functions demonstrate two separate checks to detect if the code is being
