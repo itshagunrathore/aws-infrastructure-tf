@@ -7,6 +7,7 @@ import (
 
 type JobDefinitionRepository interface {
 	FindById(id uint) entities.JobDefinition
+	FindByAccountIdAndJobName(accountId string, jobName string) entities.JobDefinition
 }
 
 type jobDefinitionRepository struct {
@@ -19,9 +20,18 @@ func NewJobDefinitionRepository(DB db.PostgresDB) JobDefinitionRepository {
 	}
 }
 
-func (j *jobDefinitionRepository) FindById(id uint) entities.JobDefinition {
+func (repo *jobDefinitionRepository) FindById(id uint) entities.JobDefinition {
 	var jobDefinition entities.JobDefinition
-	j.DB.DB().Find(&jobDefinition, id)
+	repo.DB.DB().Find(&jobDefinition, id)
+
+	return jobDefinition
+}
+
+func (repo *jobDefinitionRepository) FindByAccountIdAndJobName(accountId string, jobName string) entities.JobDefinition {
+	var jobDefinition entities.JobDefinition
+
+	repo.DB.DB().
+		repo.DB.DB().Find(&jobDefinition, accountId, jobName)
 
 	return jobDefinition
 }

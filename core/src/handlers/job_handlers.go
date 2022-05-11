@@ -1,32 +1,50 @@
 package handlers
 
 import (
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/models"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/services"
 )
 
 type JobHandlers interface {
-	GetJob() error
+	GetJob(context *gin.Context) error
+	GetAllJob(context *gin.Context) error
+	PostJob(context *gin.Context) error
 }
 
-GetAllJob() error
 type jobHandlers struct {
-	JobService services.JobService
+	service services.JobService
 }
 
-func (service jobHandlers) GetJob() error {
-	services.JobService.GetJob(dto)
+func NewJobHandler(service services.JobService) JobHandlers {
+	return &jobHandlers{service}
 }
 
-func HandleLogging() {
-	logger := log.Logger()
-	logger.Info("Hello World")
-	logger.Error("Not able to reach blog.")
+func (handler *jobHandlers) GetJob(context *gin.Context) error {
+	return nil
+}
 
-	var configs models.Configurations
-	config.GetConfig(&configs)
+func (handler *jobHandlers) GetAllJob(context *gin.Context) error {
+	//TODO implement me
+	panic("implement me")
+}
 
-	logger.Info("the configs are ", configs)
+func (handler *jobHandlers) PostJob(context *gin.Context) error {
+
+	var postJobDto dto.PostJobDto
+	accountId := context.Param("account-id")
+
+	if err := context.BindJSON(&postJobDto); err != nil {
+		return nil
+	}
+
+	jobId, err := handler.service.CreateJob(context, accountId, postJobDto)
+
+	if err != nil {
+
+	}
+	context.JSON(http.StatusAccepted, jobId)
+	return nil
 }

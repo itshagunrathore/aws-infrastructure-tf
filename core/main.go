@@ -13,7 +13,6 @@ func main() {
 	var cfg *models.Configurations
 	config.ReadConfigInto(&cfg)
 	fmt.Println(cfg)
-
 	fmt.Println("printing configuration values: ", cfg.DbConfig.Host)
 	fmt.Println(cfg.DbConfig.Username)
 	fmt.Println(cfg.DbConfig.Password)

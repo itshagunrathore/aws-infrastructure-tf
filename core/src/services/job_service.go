@@ -1,13 +1,15 @@
 package services
 
 import (
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
+	"github.com/gin-gonic/gin"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/entities"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
 )
 
 type JobService interface {
 	GetJob(jobId uint) entities.JobDefinition
+	CreateJob(context *gin.Context, accountId string, postJobDto dto.PostJobDto) (int, error)
 }
 
 type jobService struct {
@@ -20,17 +22,14 @@ func NewJobService(jd repositories.JobDefinitionRepository) JobService {
 	}
 }
 
-func (repo *jobService) GetJob(jobId uint) entities.JobDefinition {
-	return repo.JobDefinitionRepository.FindById(jobId)
+func (service *jobService) GetJob(jobId uint) entities.JobDefinition {
+	return service.JobDefinitionRepository.FindById(jobId)
 }
 
+func (service *jobService) CreateJob(context *gin.Context, accountId string, postJobDto dto.PostJobDto) (int, error) {
 
-func HandleService() {
-	logger := log.Logger()
-	logger.Info("Hello World from service")
-	logger.Error("Not able to reach blog. from service")
+	jobName := postJobDto.Name
+
+	jobDefinitionEntity := maptoentity(postJobDto)
+	return 1, nil
 }
-
-// func GetAllJobsService(site_id string) []dto.GetAllJobsDto {
-// 	return dao.GetAllJobs(site_id)
-// }

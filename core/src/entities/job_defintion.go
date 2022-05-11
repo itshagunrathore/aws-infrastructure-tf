@@ -62,6 +62,7 @@ type JobDefinition struct {
 	RetentionCopiesCount int
 	IsAutoAbortActive    bool `gorm:"not null"`
 	AutoAbortInMin       int  `gorm:"not null"`
+	CustomerSite         CustomerSite
 }
 
 func (t *JobDefinition) TableName() string {
