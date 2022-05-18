@@ -1,13 +1,15 @@
 package repositories
 
 import (
+	"errors"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/entities"
+	"gorm.io/gorm"
 )
 
 type JobDefinitionRepository interface {
 	FindById(id uint) entities.JobDefinition
-	FindByAccountIdAndJobName(accountId string, jobName string) entities.JobDefinition
+	FindByAccountIdAndJobName(accountId string, jobName string) (*entities.JobDefinition, error)
 }
 
 type jobDefinitionRepository struct {
@@ -27,11 +29,15 @@ func (repo *jobDefinitionRepository) FindById(id uint) entities.JobDefinition {
 	return jobDefinition
 }
 
-func (repo *jobDefinitionRepository) FindByAccountIdAndJobName(accountId string, jobName string) entities.JobDefinition {
+func (repo *jobDefinitionRepository) FindByAccountIdAndJobName(accountId string, jobName string) (*entities.JobDefinition, error) {
 	var jobDefinition entities.JobDefinition
+	db := repo.DB.DB()
+	err := db.Joins("CustomerSite", db.Where(&entities.CustomerSite{SiteId: accountId})).First(&jobDefinition, "jobDefinition.Name = ?",
+		jobName, "jobDefinition.IsDeleted = ?", false, "").Error
 
-	repo.DB.DB().
-		repo.DB.DB().Find(&jobDefinition, accountId, jobName)
-
-	return jobDefinition
+	// need to return some predefined error saying no record found
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
+	}
+	return &jobDefinition, nil
 }

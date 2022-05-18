@@ -2,21 +2,26 @@ package main
 
 import (
 	"fmt"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/routers"
 	"os"
-
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/models"
 )
 
 func main() {
-
-	var cfg *models.Configurations
-	config.ReadConfigInto(&cfg)
-	fmt.Println(cfg)
-	fmt.Println("printing configuration values: ", cfg.DbConfig.Host)
-	fmt.Println(cfg.DbConfig.Username)
-	fmt.Println(cfg.DbConfig.Password)
-	fmt.Println(cfg.DbConfig.SSLEnabled)
+	log.InitiateLogger("INFO", "dev")
+	router := web.NewRouter()
+	r := routers.NewRoute(*router)
+	r.GetRoute()
+	router.Engine.Run()
+	//http.ListenAndServe(":8070", r)
+	//var cfg *models.Configurations
+	//config.ReadConfigInto(&cfg)
+	//fmt.Println(cfg)
+	//fmt.Println("printing configuration values: ", cfg.DbConfig.Host)
+	//fmt.Println(cfg.DbConfig.Username)
+	//fmt.Println(cfg.DbConfig.Password)
+	//fmt.Println(cfg.DbConfig.SSLEnabled)
 	// postgresDb := db.NewDBConnection(cfg.DBConfig)
 	// handlers.HandleLogging()
 	// services.HandleService()

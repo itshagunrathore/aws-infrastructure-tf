@@ -60,9 +60,9 @@ type JobDefinition struct {
 	JobType              jobType `gorm:"not null"`
 	BackupType           backupType
 	RetentionCopiesCount int
-	IsAutoAbortActive    bool `gorm:"not null"`
-	AutoAbortInMin       int  `gorm:"not null"`
-	CustomerSite         CustomerSite
+	IsAutoAbortActive    bool         `gorm:"not null"`
+	AutoAbortInMin       int          `gorm:"not null"`
+	CustomerSite         CustomerSite `gorm:"foreignKey:CustomerSiteId"`
 }
 
 func (t *JobDefinition) TableName() string {
