@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/errors"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/middlewares"
 	"io/ioutil"
 	"net/http"
 	"reflect"
@@ -54,20 +55,25 @@ func (handler *jobHandlers) PostJob(context *gin.Context) {
 	//	log.Error(err)
 	//}
 	log.Info(postJobDto)
+
+	// call audit here
 	jobId, err := handler.service.CreateJob(context, accountId, postJobDto)
 
 	if err != nil {
-		if reflect.TypeOf(err) == reflect.TypeOf(errors.JobAlreadyExistsError{}){}) {
+		if reflect.TypeOf(err) == reflect.TypeOf(errors.JobAlreadyExistsError{}) {
 			// return 409 conflict
+			middlewares.ErrorHandler(context, err, http.StatusConflict)
 			return
 		}
-		if error.TypeOf(err) == reflect.TypeOf(Vaidation err){
-			//return 404 bad request
-		}
-		if error.TypeOf(err) == reflect.TypeOf(internal server error){
-			// return 500
-			return
-		}
+		//if reflect.TypeOf(err) == reflect.TypeOf() {
+		//	middlewares.ErrorHandler(context, err, http.StatusBadRequest)
+		//	return
+		//	//return 400 bad request
+		//}
+		//if reflect.TypeOf(err) == reflect.TypeOf(errors.InternalServerError{}) {
+		//	// return 500
+		//	return
+		//}
 	}
 
 	//add newly created job definition in body and return json with 202
@@ -76,5 +82,4 @@ func (handler *jobHandlers) PostJob(context *gin.Context) {
 		return
 	}
 	context.JSON(http.StatusAccepted, jobId)
-
 }

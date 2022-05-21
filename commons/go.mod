@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.7.7
+	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/spf13/viper v1.10.1
 	go.uber.org/zap v1.21.0
 	gorm.io/driver/postgres v1.3.3

@@ -1,17 +1,25 @@
 package models
 
+import validation "github.com/go-ozzo/ozzo-validation/v4"
+
 type JobObjects struct {
-	ConfigMapName  string           `json:"configMapName,omitempty"`
-	ExcludeObjects []ExcludeObjects `json:"excludeObjects,omitempty"`
-	IncludeAll     bool             `json:"includeAll"`
-	MapTo          string           `json:"mapTo,omitempty"`
-	ObjectName     string           `json:"objectName"`
-	ObjectType     string           `json:"objectType"`
-	ParentName     string           `json:"parentName"`
-	ParentType     string           `json:"parentType"`
+	ObjectName     string           `json:"object_name"`
+	ObjectType     string           `json:"object_type"`
+	ParentName     string           `json:"parent_name"`
+	ParentType     string           `json:"parent_type"`
+	IncludeAll     bool             `json:"include_all"`
+	ConfigMapName  string           `json:"config_map_name,omitempty"`
+	ExcludeObjects []ExcludeObjects `json:"exclude_objects,omitempty"`
 	RenameTo       string           `json:"renameTo,omitempty"`
+	MapTo          string           `json:"mapTo,omitempty"`
 }
 
-func NewJobObjects(configMapName string, excludeObjects []ExcludeObjects, includeAll bool, mapTo string, objectName string, objectType string, parentName string, parentType string, renameTo string) *JobObjects {
-	return &JobObjects{ConfigMapName: configMapName, ExcludeObjects: excludeObjects, IncludeAll: includeAll, MapTo: mapTo, ObjectName: objectName, ObjectType: objectType, ParentName: parentName, ParentType: parentType, RenameTo: renameTo}
+func (jobObjects JobObjects) Validate() error {
+	return validation.ValidateStruct(&jobObjects,
+		validation.Field(&jobObjects.ObjectName, validation.Required),
+		validation.Field(&jobObjects.ObjectType, validation.Required),
+		validation.Field(&jobObjects.ParentName, validation.Required),
+		validation.Field(&jobObjects.ParentType, validation.Required),
+		validation.Field(&jobObjects.IncludeAll, validation.Required),
+	)
 }

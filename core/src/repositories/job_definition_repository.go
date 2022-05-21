@@ -36,7 +36,10 @@ func (repo *jobDefinitionRepository) FindByAccountIdAndJobName(accountId string,
 		jobName, "jobDefinition.IsDeleted = ?", false, "").Error
 
 	// need to return some predefined error saying no record found
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, err
+		}
 		return nil, err
 	}
 	return &jobDefinition, nil

@@ -16,7 +16,7 @@ func NewRoute(r web.Router) RouterStruct {
 	return RouterStruct{r}
 }
 
-func (r *RouterStruct) GetRoute() {
+func (r *RouterStruct) GetRoute() { //rename to job handlers
 	dbConfig := db.DbConfig{
 		Username: "dev_admin",
 		Password: "postgre&308",
