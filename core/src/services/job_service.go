@@ -3,9 +3,13 @@ package services
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dsaclient/dsahandlers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/entities"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/mappers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
+	"gorm.io/gorm"
 )
 
 type JobService interface {
@@ -15,11 +19,13 @@ type JobService interface {
 
 type jobService struct {
 	JobDefinitionRepository repositories.JobDefinitionRepository
+	CustomerSiteRepository  repositories.CustomerSiteRepository
 }
 
-func NewJobService(jd repositories.JobDefinitionRepository) JobService {
+func NewJobService(jd repositories.JobDefinitionRepository, customerSite repositories.CustomerSiteRepository) JobService {
 	return &jobService{
 		JobDefinitionRepository: jd,
+		CustomerSiteRepository:  customerSite,
 	}
 }
 
@@ -38,12 +44,30 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 
 	jobName := postJobDto.Name
 
-	_, err = service.checkJobAlreadyExists(context, accountId, jobName)
+	isPresent, err := service.checkJobAlreadyExists(context, accountId, jobName)
 
 	if err != nil {
 		return 0, err
 	}
-	//jobDefinitionEntity := maptoentity(postJobDto)
+
+	if isPresent {
+		return 0, customerrors.JobAlreadyExistsError{JobName: jobName, AccountId: accountId}
+	}
+
+	customerSite, err := service.CustomerSiteRepository.Get(accountId)
+
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println(customerSite)
+	//jobToSave := mappers.NewJobDefinitionEntityMapper().MapToJobDefinitionEntity(postJobDto)
+	//jobToSave.CustomerSiteId = customerSite.CustomerSiteId
+	//jobId, err := service.JobDefinitionRepository.Save(jobToSave)
+	createDsaJobRequest := mappers.NewCreateDsaJobRequestMapper().MapToCreateDsaJobRequest(postJobDto, accountId, 0)
+	service.triggerDsaJobCreation(createDsaJobRequest)
+	if err != nil {
+		return 0, err
+	}
 	// map to entity and trigger async flow for job creation on dsa
 	//create a job definition in database and return new job with status as in progress
 
@@ -58,14 +82,17 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 	// triggered async workflow but not able to get dsa up. within specific retries. then also can be retriggered.
 	// failed at dsa side then also can be retried with correct input or after rectifying dsa error.
 
-	return 1, nil
+	return 0, nil
 }
 
 func (service *jobService) checkJobAlreadyExists(context *gin.Context, accountId string, jobName string) (bool, error) {
 	jobDefinition, err := service.JobDefinitionRepository.FindByAccountIdAndJobName(accountId, jobName)
+	fmt.Println(jobDefinition)
 
 	if err != nil {
-		fmt.Println(err)
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
 		return false, err
 	}
 
@@ -73,4 +100,10 @@ func (service *jobService) checkJobAlreadyExists(context *gin.Context, accountId
 		return true, nil
 	}
 	return false, nil
+}
+
+func (service *jobService) triggerDsaJobCreation(createDsaJobRequest dto.CreateDsaJobRequest) {
+
+	go dsahandlers.CreateDsaJobHandler(createDsaJobRequest)
+	return
 }

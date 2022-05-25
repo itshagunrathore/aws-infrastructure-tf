@@ -23,7 +23,7 @@ func main() {
 	//fmt.Println(cfg.DbConfig.Password)
 	//fmt.Println(cfg.DbConfig.SSLEnabled)
 	// postgresDb := db.NewDBConnection(cfg.DBConfig)
-	// handlers.HandleLogging()
+	// dsahandlers.HandleLogging()
 	// services.HandleService()
 	// fmt.Printf("Running project: `%s`\n", src.ProjectName())
 

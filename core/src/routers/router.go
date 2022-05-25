@@ -16,7 +16,7 @@ func NewRoute(r web.Router) RouterStruct {
 	return RouterStruct{r}
 }
 
-func (r *RouterStruct) GetRoute() { //rename to job handlers
+func (r *RouterStruct) GetRoute() { //rename to job dsahandlers
 	dbConfig := db.DbConfig{
 		Username: "dev_admin",
 		Password: "postgre&308",
@@ -25,7 +25,8 @@ func (r *RouterStruct) GetRoute() { //rename to job handlers
 		DbName:   "baas_dev_db"}
 	DB := db.NewDBConnection(dbConfig)
 	jobDefinitionRepository := repositories.NewJobDefinitionRepository(DB)
-	jobService := services.NewJobService(jobDefinitionRepository)
+	customerSiteRepository := repositories.NewCustomerSiteRepository(DB)
+	jobService := services.NewJobService(jobDefinitionRepository, customerSiteRepository)
 	jobHandlers := handlers.NewJobHandler(jobService)
 	r.router.Engine.POST("/baas-api/v1/accounts/:account-id/jobs", jobHandlers.PostJob)
 

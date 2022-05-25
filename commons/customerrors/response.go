@@ -1,4 +1,4 @@
-package errors
+package customerrors
 
 type ErrorResponse struct {
 	Message string      `json:"message"`

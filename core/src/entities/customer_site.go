@@ -24,3 +24,7 @@ type CustomerSite struct {
 	CloudSysId       string
 	CloudCustomerId  string
 }
+
+func (t *CustomerSite) TableName() string {
+	return "customer_site"
+}

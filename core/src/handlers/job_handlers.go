@@ -3,7 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/errors"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/middlewares"
 	"io/ioutil"
@@ -60,17 +61,17 @@ func (handler *jobHandlers) PostJob(context *gin.Context) {
 	jobId, err := handler.service.CreateJob(context, accountId, postJobDto)
 
 	if err != nil {
-		if reflect.TypeOf(err) == reflect.TypeOf(errors.JobAlreadyExistsError{}) {
+		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.JobAlreadyExistsError{}) {
 			// return 409 conflict
 			middlewares.ErrorHandler(context, err, http.StatusConflict)
 			return
 		}
-		//if reflect.TypeOf(err) == reflect.TypeOf() {
-		//	middlewares.ErrorHandler(context, err, http.StatusBadRequest)
-		//	return
-		//	//return 400 bad request
-		//}
-		//if reflect.TypeOf(err) == reflect.TypeOf(errors.InternalServerError{}) {
+		if reflect.TypeOf(err) == reflect.TypeOf(validation.Errors{}) {
+			middlewares.ErrorHandler(context, err, http.StatusBadRequest)
+			return
+			//return 400 bad request
+		}
+		//if reflect.TypeOf(err) == reflect.TypeOf(customerrors.InternalServerError{}) {
 		//	// return 500
 		//	return
 		//}

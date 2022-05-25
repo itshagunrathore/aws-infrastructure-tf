@@ -23,3 +23,8 @@ func (jobObjects JobObjects) Validate() error {
 		validation.Field(&jobObjects.IncludeAll, validation.Required),
 	)
 }
+
+type ExcludeObjects struct {
+	ObjectName string `json:"objectName"`
+	ObjectType string `json:"objectType"`
+}
