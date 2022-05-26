@@ -104,6 +104,6 @@ func (service *jobService) checkJobAlreadyExists(context *gin.Context, accountId
 
 func (service *jobService) triggerDsaJobCreation(createDsaJobRequest dto.CreateDsaJobRequest) {
 
-	go dsahandlers.CreateDsaJobHandler(createDsaJobRequest)
+	go dsahandlers.CreateDsaJobHandler(createDsaJobRequest) //even api
 	return
 }

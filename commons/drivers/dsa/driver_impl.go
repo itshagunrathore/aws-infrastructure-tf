@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"io/ioutil"
 	"net/http"
@@ -72,10 +71,10 @@ func (d *dsaDriver) SystemNames() (models.SystemsResponse, error) {
 	url := d.getBaseUrl() + "/dsa/components/systems/teradata"
 	resp, err := GetDsa(url)
 	if err != nil {
-		return models.SystemsResponse{}, customerrors.DsaError{}
+		return models.SystemsResponse{}, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return models.SystemsResponse{}, customerrors.DsaError{}
+		return models.SystemsResponse{}, err
 	}
 	var systemsResponse models.SystemsResponse
 
@@ -84,22 +83,34 @@ func (d *dsaDriver) SystemNames() (models.SystemsResponse, error) {
 	err = json.Unmarshal(body, &systemsResponse)
 
 	if err != nil {
-		return models.SystemsResponse{}, customerrors.DsaError{}
+		return models.SystemsResponse{}, err
 	}
 
 	return systemsResponse, nil
 }
 
-func (d *dsaDriver) PostJob(model models.RestJobPayload) error {
+func (d *dsaDriver) PostJob(restJobPayload models.RestJobPayload) error {
 	url := d.getBaseUrl() + "/dsa/jobs"
-	jsonString, err := json.Marshal(model)
+	jsonString, err := json.Marshal(restJobPayload)
 	if err != nil {
 		return err
 	}
 	fmt.Println(string(jsonString))
 	resp, err := PostDsa(url, jsonString)
 
-	fmt.Println(resp)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("failed to create job on dsa")
+	}
+	var createJobResponse map[string]interface{}
+	body, err := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &createJobResponse)
+	if err != nil {
+		return err
+	}
+	if createJobResponse[""]
 	return errors.New("test")
 }
 

@@ -12,5 +12,6 @@ func CreateDsaJobHandler(createDsaJobRequest dto.CreateDsaJobRequest) {
 	createDsaJobRequest.JobObjects[0].ParentType = "DATABASE"
 	createDsaJobRequest.JobObjects[0].ParentName = ""
 	createDsaJobRequest.JobObjects[0].ObjectType = "DATABASE"
+
 	dsaservice.NewDsaService().CreateDsaJob(createDsaJobRequest)
 }

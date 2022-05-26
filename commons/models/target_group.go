@@ -5,6 +5,7 @@ type TargetGroupsResponse struct {
 	Status         string         `json:"status"`
 	S3Target       []S3Target     `json:"s3Target"`
 	Azure          []AzureTarget  `json:"azure"`
+	Gcp            []GcpTarget    `json:"gcp"`
 	Valid          bool           `json:"valid"`
 }
 
@@ -14,4 +15,8 @@ type S3Target struct {
 
 type AzureTarget struct {
 	TargetGroupName string `json:"targetGroupName"`
+}
+
+type GcpTarget struct {
+	TargetGroupsName string `json:"targetGroupName"`
 }

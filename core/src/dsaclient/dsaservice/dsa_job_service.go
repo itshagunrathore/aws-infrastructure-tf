@@ -6,6 +6,7 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
 )
 
 type DsaService interface {
@@ -13,10 +14,11 @@ type DsaService interface {
 }
 
 type dsaService struct {
+	jobDefinitionRepo repositories.JobDefinitionRepository
 }
 
-func NewDsaService() DsaService {
-	return &dsaService{}
+func NewDsaService(repository repositories.JobDefinitionRepository) DsaService {
+	return &dsaService{repository}
 }
 
 func (d *dsaService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
@@ -26,7 +28,7 @@ func (d *dsaService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
 
 	systemName, err := d.GetSystemName(dsaDriver)
 	targetGroup, err := d.GetTarGetGroup(dsaDriver, request.SiteTargetType)
-	// find a way to get this secrets
+	// TODO for antares fetch secrets from secrets manager for time being using baradmin user
 	userName := "baradmin"
 	password := "V#cbjioln0367192"
 
@@ -41,21 +43,14 @@ func (d *dsaService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
 	dsaRestJobPayload.RestJobDefinitionModel.SrcUserPassword = password
 	dsaRestJobPayload.RestJobSettingsModel = request.JobSettings
 	dsaRestJobPayload.RestJobObjectsModels = request.JobObjects
-
-	fmt.Println("creating dsa job")
 	err = dsaDriver.PostJob(dsaRestJobPayload)
 
+	//
 	if err != nil {
 		return err
 	}
-
 	fmt.Println(systemName, targetGroup)
-	// get system name
-	// get target-group-name
-	// get password
-	// preparepaylaod
-	// trigger job_creation
-	// update status
+
 	return err
 }
 
@@ -63,7 +58,7 @@ func (d *dsaService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
 	systems, err := dsaDriver.SystemNames()
 
 	if err != nil {
-		return "", err
+		return "", errors.New("no enabled system found")
 	}
 	var enabledSystems []models.Systems
 	if systems.Valid && len(systems.Systems) > 0 {
@@ -75,9 +70,8 @@ func (d *dsaService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
 	}
 	if len(enabledSystems) > 0 {
 		return enabledSystems[0].SystemName, nil
-	} else {
-		return " ", errors.New("no enabled systems found")
 	}
+	return "", errors.New("no enabled system found")
 }
 
 func (d *dsaService) GetTarGetGroup(dsaDriver dsa.DsaDriver, siteTargetType models.SiteTargetType) (string, error) {
@@ -85,14 +79,16 @@ func (d *dsaService) GetTarGetGroup(dsaDriver dsa.DsaDriver, siteTargetType mode
 	targetGroups, err := dsaDriver.GetTargetGroup(siteTargetType)
 
 	if err != nil {
-		return "", err
+		return "", errors.New("error while fetching target groups")
 	}
-
+	// TODO currently we are going with vantage assumption once we decide on fix target-group-name for baas we will check for that
 	if siteTargetType == models.AWS {
 		return targetGroups.S3Target[0].TargetGroupName, nil
 	} else if siteTargetType == models.AZURE {
 		return targetGroups.Azure[0].TargetGroupName, nil
+	} else if siteTargetType == models.GCP {
+		return targetGroups.Gcp[0].TargetGroupsName, nil
 	}
-	// correct error handling needed
-	return "", err
+
+	return "", errors.New("no target-group found for job creation")
 }
