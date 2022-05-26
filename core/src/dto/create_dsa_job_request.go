@@ -6,8 +6,8 @@ type CreateDsaJobRequest struct {
 	JobName        string
 	Description    string
 	JobType        models.JobType
-	accountId      string
-	siteTargetType string
+	AccountId      string
+	SiteTargetType models.SiteTargetType
 	BaaSJobId      int
 	JobSettings    models.JobSettings
 	JobObjects     []models.JobObjects
