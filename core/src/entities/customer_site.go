@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gorm.io/datatypes"
 	"time"
 )
@@ -11,7 +12,7 @@ type CustomerSite struct {
 	SiteId           string
 	CustomerSiteId   int
 	ServerUuid       string
-	SiteTargetType   string
+	SiteTargetType   models.SiteTargetType
 	SiteRegion       string
 	OptInEmailReport bool
 	OptInRetryFlag   bool

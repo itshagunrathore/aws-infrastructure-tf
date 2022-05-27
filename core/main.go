@@ -5,14 +5,16 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/routers"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/services"
 	"os"
 )
 
-const DB
-
 func main() {
 	log.InitiateLogger("INFO", "dev")
+	router := web.NewRouter()
+	r := routers.NewRoute(*router)
 	dbConfig := db.DbConfig{
 		Username: "dev_admin",
 		Password: "postgre&308",
@@ -20,9 +22,12 @@ func main() {
 		Host:     "baas-rds-dev-725b87755a61c35c.elb.us-west-2.amazonaws.com",
 		DbName:   "baas_dev_db"}
 	DB := db.NewDBConnection(dbConfig)
-	router := web.NewRouter()
-	r := routers.NewRoute(*router)
-	r.GetRoute(DB)
+	jobDefinitionRepository := repositories.NewJobDefinitionRepository(DB)
+	customerSiteRepository := repositories.NewCustomerSiteRepository(DB)
+	latestJobSessionRepository := repositories.NewLatestJobSessionRepository(DB)
+	jobService := services.NewJobService(jobDefinitionRepository, customerSiteRepository, latestJobSessionRepository)
+	r.GetJobHandlers(jobService)
+
 	router.Engine.Run()
 	//http.ListenAndServe(":8070", r)
 	//var cfg *models.Configurations

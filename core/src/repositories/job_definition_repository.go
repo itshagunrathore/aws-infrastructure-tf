@@ -8,7 +8,7 @@ import (
 )
 
 type JobDefinitionRepository interface {
-	FindById(id uint) entities.JobDefinition
+	FindByAccountIdAndJobId(accountId string, jobId int) (entities.JobDefinition, error)
 	FindByAccountIdAndJobName(accountId string, jobName string) (*entities.JobDefinition, error)
 	Save(job entities.JobDefinition) (int, error)
 }
@@ -23,11 +23,14 @@ func NewJobDefinitionRepository(DB db.PostgresDB) JobDefinitionRepository {
 	}
 }
 
-func (repo *jobDefinitionRepository) FindById(id uint) entities.JobDefinition {
+func (repo *jobDefinitionRepository) FindByAccountIdAndJobId(accountId string, jobId int) (entities.JobDefinition, error) {
 	var jobDefinition entities.JobDefinition
-	repo.DB.DB().Find(&jobDefinition, id)
-
-	return jobDefinition
+	db := repo.DB.DB()
+	err := db.Where(&entities.JobDefinition{JobId: jobId, IsActive: true, IsDeleted: false}).Joins("CustomerSite", db.Where(&entities.CustomerSite{SiteId: accountId})).First(&jobDefinition).Error
+	if err != nil {
+		return entities.JobDefinition{}, err
+	}
+	return jobDefinition, nil
 }
 
 func (repo *jobDefinitionRepository) Save(job entities.JobDefinition) (int, error) {

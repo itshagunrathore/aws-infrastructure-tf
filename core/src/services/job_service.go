@@ -4,38 +4,52 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dsaclient/dsahandlers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/entities"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/mappers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
 	"gorm.io/gorm"
 )
 
 type JobService interface {
-	GetJob(jobId uint) entities.JobDefinition
+	GetJob(context *gin.Context, accountId string, jobId int) (dto.GetJobDto, error)
 	CreateJob(context *gin.Context, accountId string, postJobDto dto.PostJobDto) (int, error)
 }
 
 type jobService struct {
-	JobDefinitionRepository repositories.JobDefinitionRepository
-	CustomerSiteRepository  repositories.CustomerSiteRepository
+	JobDefinitionRepository    repositories.JobDefinitionRepository
+	CustomerSiteRepository     repositories.CustomerSiteRepository
+	LatestJobSessionRepository repositories.LatestJobSessionRepository
 }
 
-func NewJobService(jd repositories.JobDefinitionRepository, customerSite repositories.CustomerSiteRepository) JobService {
+func NewJobService(jd repositories.JobDefinitionRepository, customerSite repositories.CustomerSiteRepository, latestJobSession repositories.LatestJobSessionRepository) JobService {
 	return &jobService{
-		JobDefinitionRepository: jd,
-		CustomerSiteRepository:  customerSite,
+		JobDefinitionRepository:    jd,
+		CustomerSiteRepository:     customerSite,
+		LatestJobSessionRepository: latestJobSession,
 	}
 }
 
-func (service *jobService) GetJob(jobId uint) entities.JobDefinition {
-	return service.JobDefinitionRepository.FindById(jobId)
+func (service *jobService) GetJob(context *gin.Context, accountId string, jobId int) (dto.GetJobDto, error) {
+	jobDefinitionEntity, err := service.JobDefinitionRepository.FindByAccountIdAndJobId(accountId, jobId)
+	if err != nil {
+		return dto.GetJobDto{}, err
+	}
+	getJobDto := mappers.NewGetJobMapper().ToGetJobDto(jobDefinitionEntity)
+	return getJobDto, nil
 }
 
 func (service *jobService) CreateJob(context *gin.Context, accountId string, postJobDto dto.PostJobDto) (int, error) {
 
 	err := postJobDto.Validate()
+	// TODO should have type for parentType and objectType
+	if postJobDto.BackupMechanism == models.DSA && postJobDto.DsaJobDefinition.JobObjects[0].ObjectName == "" {
+		postJobDto.DsaJobDefinition.JobObjects[0].ObjectName = "DBC"
+		postJobDto.DsaJobDefinition.JobObjects[0].ParentType = "DATABASE"
+		postJobDto.DsaJobDefinition.JobObjects[0].ParentName = ""
+		postJobDto.DsaJobDefinition.JobObjects[0].ObjectType = "DATABASE"
+	}
 
 	if err != nil {
 		fmt.Println(err)
@@ -59,12 +73,12 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println(customerSite)
-	//jobToSave := mappers.NewJobDefinitionEntityMapper().MapToJobDefinitionEntity(postJobDto)
-	//jobToSave.CustomerSiteId = customerSite.CustomerSiteId
-	//jobId, err := service.JobDefinitionRepository.Save(jobToSave)
+	//fmt.Println(customerSite)
+	jobToSave := mappers.NewJobDefinitionEntityMapper().MapToJobDefinitionEntity(postJobDto)
+	jobToSave.CustomerSiteId = customerSite.CustomerSiteId
+	jobId, err := service.JobDefinitionRepository.Save(jobToSave)
 	createDsaJobRequest := mappers.NewCreateDsaJobRequestMapper().MapToCreateDsaJobRequest(postJobDto, accountId, 0)
-	service.triggerDsaJobCreation(createDsaJobRequest)
+	defer service.triggerDsaJobCreation(createDsaJobRequest)
 	if err != nil {
 		return 0, err
 	}
@@ -82,7 +96,7 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 	// triggered async workflow but not able to get dsa up. within specific retries. then also can be retriggered.
 	// failed at dsa side then also can be retried with correct input or after rectifying dsa error.
 
-	return 0, nil
+	return jobId, nil
 }
 
 func (service *jobService) checkJobAlreadyExists(context *gin.Context, accountId string, jobName string) (bool, error) {

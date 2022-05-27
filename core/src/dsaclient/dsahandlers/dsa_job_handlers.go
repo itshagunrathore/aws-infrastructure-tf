@@ -8,10 +8,6 @@ import (
 
 func CreateDsaJobHandler(createDsaJobRequest dto.CreateDsaJobRequest) {
 	fmt.Println("request recieved for create job")
-	createDsaJobRequest.JobObjects[0].ObjectName = "DBC"
-	createDsaJobRequest.JobObjects[0].ParentType = "DATABASE"
-	createDsaJobRequest.JobObjects[0].ParentName = ""
-	createDsaJobRequest.JobObjects[0].ObjectType = "DATABASE"
 
 	dsaservice.NewDsaService().CreateDsaJob(createDsaJobRequest)
 }

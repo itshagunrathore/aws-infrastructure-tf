@@ -63,9 +63,10 @@ type JobDefinition struct {
 	JobType              models.JobType `gorm:"not null"`
 	BackupType           models.BackupType
 	RetentionCopiesCount int
-	IsAutoAbortActive    bool         `gorm:"not null"`
-	AutoAbortInMin       int          `gorm:"not null"`
-	CustomerSite         CustomerSite `gorm:"foreignKey:CustomerSiteId;references:CustomerSiteId" `
+	IsAutoAbortActive    bool             `gorm:"not null"`
+	AutoAbortInMin       int              `gorm:"not null"`
+	CustomerSite         CustomerSite     `gorm:"foreignKey:CustomerSiteId;references:CustomerSiteId"`
+	LatestJobSession     LatestJobSession `gorm:"foreignKey:JobSessionId"`
 }
 
 func (t *JobDefinition) TableName() string {

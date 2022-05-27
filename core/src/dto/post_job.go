@@ -29,7 +29,7 @@ func (dto PostJobDto) Validate() error {
 		validation.Field(&dto.Description, validation.Required),
 		validation.Field(&dto.JobType, validation.Required, validation.In(models.Backup, models.Restore)),
 		validation.Field(&dto.IsActive, validation.Required),
-		validation.Field(&dto.BackupMechanism, validation.Required, validation.In(models.DSA, models.CDP)),
+		validation.Field(&dto.BackupMechanism, validation.Required, validation.In(models.DSA)),
 		validation.Field(&dto.DsaJobDefinition),
 		//validation.Required.When(dto.DsaJobDefinition != nil), validation.Nil.When(dto.DsaJobDefinition == nil)
 	)

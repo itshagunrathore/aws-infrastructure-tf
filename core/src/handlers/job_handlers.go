@@ -6,10 +6,11 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/middlewares"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/response"
 	"io/ioutil"
 	"net/http"
 	"reflect"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
@@ -31,7 +32,25 @@ func NewJobHandler(service services.JobService) JobHandlers {
 }
 
 func (handler *jobHandlers) GetJob(context *gin.Context) {
-	panic("implement me")
+	log.Infow("request received for get job", "baas-trace-id", context.Value("baas-trace-id"))
+
+	accountId := context.Param("account-id")
+	jobId, err := strconv.Atoi(context.Param("job-id"))
+
+	if err != nil {
+		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
+		return
+	}
+	getJobDto, err := handler.service.GetJob(context, accountId, jobId)
+
+	if err != nil {
+		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
+		return
+	}
+
+	response.SuccessResponseHandler(context, getJobDto, http.StatusOK)
+	return
+
 }
 
 func (handler *jobHandlers) GetAllJob(context *gin.Context) {
@@ -40,47 +59,44 @@ func (handler *jobHandlers) GetAllJob(context *gin.Context) {
 }
 
 func (handler *jobHandlers) PostJob(context *gin.Context) {
-
+	log.Infow("request received for post job", "baas-trace-id", context.Value("baas-trace-id"))
 	var postJobDto dto.PostJobDto
+
 	accountId := context.Param("account-id")
 	jsonData, err := ioutil.ReadAll(context.Request.Body)
 
+	log.Infow("request body is", "baas-trace-id", context.Value("baas-trace-id"), "body", string(jsonData))
+	err = json.Unmarshal(jsonData, &postJobDto)
 	if err != nil {
-		//internal server error
+		msg := fmt.Sprintf("error occured while reading request body %v", err.Error())
+		log.Errorw(msg, context.Value("baas-trace-id"))
+		err = customerrors.BadRequest(msg)
+		response.ErrorResponseHandler(context, err, http.StatusBadRequest)
 		return
 	}
-	log.Info(string(jsonData))
-	json.Unmarshal(jsonData, &postJobDto)
-	fmt.Println(postJobDto)
-	//if err := context.BindJSON(&postJobDto); err != nil {
-	//	log.Error(err)
-	//}
-	log.Info(postJobDto)
-
-	// call audit here
+	// TODO call audit logic here
 	jobId, err := handler.service.CreateJob(context, accountId, postJobDto)
 
 	if err != nil {
+		log.Errorw(err.Error(), context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.JobAlreadyExistsError{}) {
-			// return 409 conflict
-			middlewares.ErrorHandler(context, err, http.StatusConflict)
+			response.ErrorResponseHandler(context, err, http.StatusConflict)
 			return
 		}
 		if reflect.TypeOf(err) == reflect.TypeOf(validation.Errors{}) {
-			middlewares.ErrorHandler(context, err, http.StatusBadRequest)
+			response.ErrorResponseHandler(context, err, http.StatusBadRequest)
 			return
-			//return 400 bad request
 		}
-		//if reflect.TypeOf(err) == reflect.TypeOf(customerrors.InternalServerError{}) {
-		//	// return 500
-		//	return
-		//}
-	}
-
-	//add newly created job definition in body and return json with 202
-	if err != nil {
-		panic("error")
+		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.ServiceError{}) {
+			response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
+			return
+		}
+		// creating a generic error here
+		err = customerrors.InternalServerError("failed to create job")
+		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
 		return
 	}
-	context.JSON(http.StatusAccepted, jobId)
+	msg := fmt.Sprintf("job created with job-id %v", jobId)
+	log.Infow(msg, "baas-trace-id", context.Value("baas-trace-id"))
+	response.SuccessResponseAccepted(context, strconv.Itoa(jobId))
 }

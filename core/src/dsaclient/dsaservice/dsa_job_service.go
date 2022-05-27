@@ -6,23 +6,21 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
 )
 
-type DsaService interface {
+type DsaJobService interface {
 	CreateDsaJob(request dto.CreateDsaJobRequest) error
 }
 
-type dsaService struct {
-	jobDefinitionRepo repositories.JobDefinitionRepository
+type dsaJobService struct {
 }
 
-func NewDsaService(repository repositories.JobDefinitionRepository) DsaService {
-	return &dsaService{repository}
+func NewDsaService() DsaJobService {
+	return &dsaJobService{}
 }
 
-func (d *dsaService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
-
+func (d *dsaJobService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
+	// TODO START DSA HERE
 	host := "tdicam2118dev00.gateway.dev.cloud.teradata.com"
 	dsaDriver := dsa.NewDsaDriver(host, "443", "", "", "", "")
 
@@ -43,7 +41,7 @@ func (d *dsaService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
 	dsaRestJobPayload.RestJobDefinitionModel.SrcUserPassword = password
 	dsaRestJobPayload.RestJobSettingsModel = request.JobSettings
 	dsaRestJobPayload.RestJobObjectsModels = request.JobObjects
-	err = dsaDriver.PostJob(dsaRestJobPayload)
+	//err = dsaDriver.PostJob(dsaRestJobPayload)
 
 	//
 	if err != nil {
@@ -54,7 +52,7 @@ func (d *dsaService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
 	return err
 }
 
-func (d *dsaService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
+func (d *dsaJobService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
 	systems, err := dsaDriver.SystemNames()
 
 	if err != nil {
@@ -74,7 +72,7 @@ func (d *dsaService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
 	return "", errors.New("no enabled system found")
 }
 
-func (d *dsaService) GetTarGetGroup(dsaDriver dsa.DsaDriver, siteTargetType models.SiteTargetType) (string, error) {
+func (d *dsaJobService) GetTarGetGroup(dsaDriver dsa.DsaDriver, siteTargetType models.SiteTargetType) (string, error) {
 
 	targetGroups, err := dsaDriver.GetTargetGroup(siteTargetType)
 
