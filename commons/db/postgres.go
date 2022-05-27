@@ -2,6 +2,7 @@ package db
 
 import (
 	"fmt"
+	"gorm.io/gorm/logger"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -41,7 +42,9 @@ func (p postgresDB) DB() *gorm.DB {
 
 func NewDBConnection(dbCfg DbConfig) PostgresDB {
 	dsn := prepareDsn(dbCfg)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Silent),
+	})
 	if err != nil {
 		fmt.Println("Error While Connecting to database")
 	} else {

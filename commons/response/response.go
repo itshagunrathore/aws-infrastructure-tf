@@ -17,3 +17,8 @@ func SuccessResponseCreated(c *gin.Context, resourceID string, body interface{})
 	c.Header("x-resource-id", resourceID)
 	c.JSON(http.StatusCreated, body)
 }
+
+func SuccessResponseAccepted(c *gin.Context, resourceID string) {
+	c.Header("x-resource-id", resourceID)
+	c.JSON(http.StatusAccepted, nil)
+}

@@ -110,7 +110,7 @@ func (d *dsaDriver) PostJob(restJobPayload models.RestJobPayload) error {
 	if err != nil {
 		return err
 	}
-	if createJobResponse[""]
+	//if createJobResponse[""]
 	return errors.New("test")
 }
 
