@@ -20,7 +20,8 @@ func main() {
 		Password: "postgre&308",
 		Port:     80,
 		Host:     "baas-rds-dev-725b87755a61c35c.elb.us-west-2.amazonaws.com",
-		DbName:   "baas_dev_db"}
+		DbName:   "baas_dev_db",
+	}
 	DB := db.NewDBConnection(dbConfig)
 	jobDefinitionRepository := repositories.NewJobDefinitionRepository(DB)
 	customerSiteRepository := repositories.NewCustomerSiteRepository(DB)

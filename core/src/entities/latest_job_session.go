@@ -7,7 +7,7 @@ import (
 
 type LatestJobSession struct {
 	JobSessionId         int `gorm:"primary_key;not null;autoIncrement"`
-	JobId                int `gorom`
+	JobId                int
 	JobStartTime         *time.Time
 	JobEndTime           *time.Time
 	LatestStatus         string

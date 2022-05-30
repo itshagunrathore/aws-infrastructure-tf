@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dsaclient/dsahandlers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
@@ -43,81 +44,92 @@ func (service *jobService) GetJob(context *gin.Context, accountId string, jobId 
 func (service *jobService) CreateJob(context *gin.Context, accountId string, postJobDto dto.PostJobDto) (int, error) {
 
 	err := postJobDto.Validate()
-	// TODO should have type for parentType and objectType
-	if postJobDto.BackupMechanism == models.DSA && postJobDto.DsaJobDefinition.JobObjects[0].ObjectName == "" {
-		postJobDto.DsaJobDefinition.JobObjects[0].ObjectName = "DBC"
-		postJobDto.DsaJobDefinition.JobObjects[0].ParentType = "DATABASE"
-		postJobDto.DsaJobDefinition.JobObjects[0].ParentName = ""
-		postJobDto.DsaJobDefinition.JobObjects[0].ObjectType = "DATABASE"
-	}
-
 	if err != nil {
-		fmt.Println(err)
+		log.Errorw(err.Error(), "baas-trace-id", context.Value("baas-trace-id"))
 		return 0, err
 	}
 
+	// TODO should have type for parentType and objectType from enums
+	if postJobDto.BackupMechanism == models.DSA && len(postJobDto.DsaJobDefinition.JobObjects) == 0 {
+		log.Infow("job objects are not provided creating default job objects", "baas-trace-id", context.Value("baas-trace-id"))
+		defaultJobObjects := []models.JobObjects{
+			models.JobObjects{
+				ObjectName: "DBC",
+				ObjectType: "DATABASE",
+				ParentName: "",
+				ParentType: "DATABASE",
+			},
+		}
+		postJobDto.DsaJobDefinition.JobObjects = defaultJobObjects
+	}
+	fmt.Println(postJobDto)
 	jobName := postJobDto.Name
-
-	isPresent, err := service.checkJobAlreadyExists(context, accountId, jobName)
-
+	isPresent, err := service.checkJobAlreadyExists(accountId, jobName)
 	if err != nil {
+		msg := fmt.Sprintf("error occurred while checking job already present database error:%s for accountID: %s", err.Error(), accountId)
+		log.Errorw(msg, "baas-trace-id", context.Value("baas-trace-id"))
 		return 0, err
 	}
 
 	if isPresent {
+		log.Errorw("job already present", "baas-trace-id", context.Value("baas-trace-id"))
 		return 0, customerrors.JobAlreadyExistsError{JobName: jobName, AccountId: accountId}
 	}
 
 	customerSite, err := service.CustomerSiteRepository.Get(accountId)
-
 	if err != nil {
+		msg := fmt.Sprintf("error occurred while fetching customer site from database error:%s for accountID: %s", err.Error(), accountId)
+		log.Errorw(msg, "baas-trace-id", context.Value("baas-trace-id"))
 		return 0, err
 	}
-	//fmt.Println(customerSite)
-	jobToSave := mappers.NewJobDefinitionEntityMapper().MapToJobDefinitionEntity(postJobDto)
+
+	jobToSave, err := mappers.NewJobDefinitionEntityMapper().MapToJobDefinitionEntity(postJobDto)
+	if err != nil {
+		msg := fmt.Sprintf("error occurred while marshling job_objects to json error:%v", err.Error())
+		log.Errorw(msg, "baas-trace-id", context.Value("baas-trace-id"))
+		return 0, err
+	}
+
 	jobToSave.CustomerSiteId = customerSite.CustomerSiteId
+	if customerSite.SiteTargetType == models.AWS {
+		jobToSave.RetentionSource = models.S3
+	} else if customerSite.SiteTargetType == models.AZURE {
+		jobToSave.RetentionSource = models.Blob
+	} else if customerSite.SiteTargetType == models.GCP {
+		jobToSave.RetentionSource = models.CloudStorage
+	}
+
 	jobId, err := service.JobDefinitionRepository.Save(jobToSave)
-	createDsaJobRequest := mappers.NewCreateDsaJobRequestMapper().MapToCreateDsaJobRequest(postJobDto, accountId, 0)
-	defer service.triggerDsaJobCreation(createDsaJobRequest)
+
 	if err != nil {
+		msg := fmt.Sprintf("error occurred while saving job_definition database error:%s for accountID: %s", err.Error(), accountId)
+		log.Errorw(msg, "baas-trace-id", context.Value("baas-trace-id"))
 		return 0, err
 	}
-	// map to entity and trigger async flow for job creation on dsa
-	//create a job definition in database and return new job with status as in progress
 
-	//mulitple cases :
-	// job lifecycle INPROGRESS, FAILED, SUCCESS.
-	// if previous is in progress then return 409 bad request with message saying already in progress.
-	// if previous failed then accept the request and make it inprogress.
-	// if previous success return 409
+	createDsaJobRequest := mappers.NewCreateDsaJobRequestMapper().MapToCreateDsaJobRequest(postJobDto, accountId, 0)
+	service.triggerDsaJobCreation(context, createDsaJobRequest)
 
-	// failure cases :
-	// failed to trigger async workflow. nothing will happen
-	// triggered async workflow but not able to get dsa up. within specific retries. then also can be retriggered.
-	// failed at dsa side then also can be retried with correct input or after rectifying dsa error.
-
+	log.Infow(fmt.Sprintf("job created successfully with jobId %d", jobId), "baas-trace-id", context.Value("baas-trace-id"))
 	return jobId, nil
 }
 
-func (service *jobService) checkJobAlreadyExists(context *gin.Context, accountId string, jobName string) (bool, error) {
+func (service *jobService) checkJobAlreadyExists(accountId string, jobName string) (bool, error) {
 	jobDefinition, err := service.JobDefinitionRepository.FindByAccountIdAndJobName(accountId, jobName)
-	fmt.Println(jobDefinition)
-
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return false, nil
 		}
 		return false, err
 	}
-
+	// TODO if the previous job is job cretion failed state then we will update the same job need to confirm on this
 	if jobDefinition.Name != "" {
 		return true, nil
 	}
 	return false, nil
 }
 
-func (service *jobService) triggerDsaJobCreation(createDsaJobRequest dto.CreateDsaJobRequest) {
-
-	go dsahandlers.CreateDsaJobHandler(createDsaJobRequest) //even api
-	return
+func (service *jobService) triggerDsaJobCreation(context *gin.Context, createDsaJobRequest dto.CreateDsaJobRequest) {
+	log.Infow("Triggering dsa job creation in go routine", "baas-trace-id", context.Value("baas-trace-id"))
+	go dsahandlers.CreateDsaJobHandler(context, createDsaJobRequest)
 }

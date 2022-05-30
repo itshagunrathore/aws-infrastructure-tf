@@ -78,7 +78,7 @@ func (handler *jobHandlers) PostJob(context *gin.Context) {
 	jobId, err := handler.service.CreateJob(context, accountId, postJobDto)
 
 	if err != nil {
-		log.Errorw(err.Error(), context.Value("baas-trace-id"))
+		log.Errorw(fmt.Sprintf("error occured %s", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.JobAlreadyExistsError{}) {
 			response.ErrorResponseHandler(context, err, http.StatusConflict)
 			return
