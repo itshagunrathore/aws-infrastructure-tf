@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/routers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/services"
-	"os"
 )
 
 func main() {
