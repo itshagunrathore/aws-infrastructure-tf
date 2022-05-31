@@ -36,7 +36,7 @@ repos:
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 2.1.5
     hooks:
-      - id: git-check     # check for git conflict markers and whitespace customerrors - uses git internally
+      - id: git-check     # check for git conflict markers and whitespace errors - uses git internally
 
   # - repo: https://github.com/golangci/golangci-lint
   #   rev: v1.42.1

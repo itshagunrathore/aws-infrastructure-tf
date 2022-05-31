@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	// TODO parse stage from config
 	log.InitiateLogger("INFO", "dev")
 	router := web.NewRouter()
 	r := routers.NewRoute(*router)

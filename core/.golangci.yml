@@ -61,11 +61,11 @@ linters-settings:
     max-blank-identifiers: 2
 
   errcheck:
-    # report about not checking customerrors in type assertions: `a := b.(MyStruct)`;
+    # report about not checking errors in type assertions: `a := b.(MyStruct)`;
     # default is false: such cases aren't reported by default.
     check-type-assertions: true
 
-    # report assignment of customerrors to blank identifier: `num, _ := strconv.Atoi(numStr)`
+    # report assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`
     # default is false: such cases aren't reported by default.
     check-blank: false
 
@@ -75,7 +75,7 @@ linters-settings:
       # - io/ioutil.ReadFile
 
   errorlint:
-    # check whether fmt.Errorf uses the %w verb for formatting customerrors.
+    # check whether fmt.Errorf uses the %w verb for formatting errors.
     # read https://github.com/polyfloyd/go-errorlint for more info
     errorf: true
     # check for plain type assertions and type switches
@@ -428,8 +428,8 @@ linters-settings:
     # See https://github.com/tomarrell/wrapcheck#configuration for more information.
     ignoreSigs:
       - .Errorf(
-      - customerrors.New(
-      - customerrors.Unwrap(
+      - errors.New(
+      - errors.Unwrap(
       - .Wrap(
       - .Wrapf(
       - .WithMessage(
