@@ -34,10 +34,22 @@ func NewJobService(jd repositories.JobDefinitionRepository, customerSite reposit
 
 func (service *jobService) GetJob(context *gin.Context, accountId string, jobId int) (dto.GetJobDto, error) {
 	jobDefinitionEntity, err := service.JobDefinitionRepository.FindByAccountIdAndJobId(accountId, jobId)
+
 	if err != nil {
+		msg := fmt.Sprintf("database error occurred whilte fetching job error:%s for accountID: %s and jobID: %d", err.Error(), accountId, jobId)
+		log.Errorw(msg, "baas-trace-id", context.Value("baas-trace-id"))
+		if err == gorm.ErrRecordNotFound {
+			return dto.GetJobDto{}, customerrors.NewResourceNotFound(fmt.Sprintf("job with job-id:%d not found for account %s", jobId, accountId))
+		}
 		return dto.GetJobDto{}, err
 	}
-	getJobDto := mappers.NewGetJobMapper().ToGetJobDto(jobDefinitionEntity)
+
+	getJobDto, err := mappers.NewGetJobMapper().ToGetJobDto(jobDefinitionEntity)
+	if err != nil {
+		msg := fmt.Sprintf("error occurred while unmarshling job_objects to json error:%v", err.Error())
+		log.Errorw(msg, "baas-trace-id", context.Value("baas-trace-id"))
+		return dto.GetJobDto{}, err
+	}
 	return getJobDto, nil
 }
 
@@ -58,11 +70,11 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 				ObjectType: "DATABASE",
 				ParentName: "",
 				ParentType: "DATABASE",
+				IncludeAll: true,
 			},
 		}
 		postJobDto.DsaJobDefinition.JobObjects = defaultJobObjects
 	}
-	fmt.Println(postJobDto)
 	jobName := postJobDto.Name
 	isPresent, err := service.checkJobAlreadyExists(accountId, jobName)
 	if err != nil {
@@ -72,8 +84,9 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 	}
 
 	if isPresent {
-		log.Errorw("job already present", "baas-trace-id", context.Value("baas-trace-id"))
-		return 0, customerrors.JobAlreadyExistsError{JobName: jobName, AccountId: accountId}
+		msg := fmt.Sprintf("job with job-name:%s already exists for account with id %s", jobName, accountId)
+		log.Errorw(msg, "baas-trace-id", context.Value("baas-trace-id"))
+		return 0, customerrors.NewDuplicateResource(msg)
 	}
 
 	customerSite, err := service.CustomerSiteRepository.Get(accountId)
@@ -122,7 +135,7 @@ func (service *jobService) checkJobAlreadyExists(accountId string, jobName strin
 		}
 		return false, err
 	}
-	// TODO if the previous job is job cretion failed state then we will update the same job need to confirm on this
+	// TODO if the previous job is job creation failed state then we will update the same job need to confirm on this
 	if jobDefinition.Name != "" {
 		return true, nil
 	}

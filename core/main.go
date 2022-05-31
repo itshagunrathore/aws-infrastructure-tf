@@ -23,6 +23,7 @@ func main() {
 		DbName:   "baas_dev_db",
 	}
 	DB := db.NewDBConnection(dbConfig)
+	//TODO if we not get DB service should not boot up
 	jobDefinitionRepository := repositories.NewJobDefinitionRepository(DB)
 	customerSiteRepository := repositories.NewCustomerSiteRepository(DB)
 	latestJobSessionRepository := repositories.NewLatestJobSessionRepository(DB)

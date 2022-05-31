@@ -23,8 +23,8 @@ type GetJobDto struct {
 	DsaJobDefinition     DsaJobDefinition       `json:"dsa_job_definition"`
 }
 type LastExecutionDetails struct {
-	Status        string    `json:"status"`
-	BackupSetSize int64     `json:"backup_set_size"`
-	StartTime     time.Time `json:"start_time"`
-	EndTime       time.Time `json:"end_time"`
+	Status        string     `json:"status"`
+	BackupSetSize int64      `json:"backup_set_size"`
+	StartTime     *time.Time `json:"start_time"`
+	EndTime       *time.Time `json:"end_time"`
 }
