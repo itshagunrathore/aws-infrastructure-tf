@@ -1,10 +1,18 @@
 package service
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
 
-func CreateDefaulJob(event event) (string, error) {
-	var payload CreateJob
-	var backupObjects RestJobObjectsModels
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+)
+
+func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (string, error) {
+	StatusAWSApp.Step = "CreateDefaultJob"
+	var payload models.CreateJob
+	var backupObjects models.RestJobObjectsModels
+	var createjobresponse models.CreateJobResponse
 	backupObjects.IncludeAll = false
 	backupObjects.ObjectName = "DBC"
 	backupObjects.ObjectType = "DATABASE"
@@ -31,10 +39,15 @@ func CreateDefaulJob(event event) (string, error) {
 
 	fmt.Println(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/jobs", event.DscIp, event.Port)
-	response, err := PostConfigDsc(url, payload)
+	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	if err != nil {
+		data := json.Unmarshal(response, &createjobresponse)
+		fmt.Printf("DSA output:%v", data)
+		StatusAWSApp.StepStatus = "Failed"
+		StatusAWSApp.StepResponse = createjobresponse.Status
 		return "Failed to configure target group", err
 	} else {
+		StatusAWSApp.StepStatus = "Success"
 		return string(response), err
 	}
 

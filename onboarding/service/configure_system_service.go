@@ -3,9 +3,14 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
-func ConfigureSystem(event event) (string, error) {
+// var StatusGetSystem models.DsaResponse
+
+func ConfigureSystem(event event, StatusConfigSystem *models.DetailedStatus) (string, error) {
+	StatusConfigSystem.Step = "ConfigureSystem"
 	var payload DsaSystem
 	payload.Password = event.Db_password
 	payload.User = event.Db_user
@@ -15,18 +20,33 @@ func ConfigureSystem(event event) (string, error) {
 	payload.TdpID = event.SystemName
 	fmt.Println(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata", event.DscIp, event.Port)
-	response, err := PostConfigDsc(url, payload)
+	response, err := dsa.PostConfigDsc(url, payload, &StatusConfigSystem)
 	if err != nil {
-		return "Failed to configure target group", err
+		StatusConfigSystem.Error = err
+		StatusConfigSystem.StepStatus = "Failed"
+		// StatusConfigSystem.StatusCode = int(response[])
+		return "Failed to configure system on dsc", err
 	} else {
+		var concfigsystemresponse ConfigSystemResponse
+		json.Unmarshal(response, &concfigsystemresponse)
+		StatusConfigSystem.StepResponse = concfigsystemresponse.Status
+		StatusConfigSystem.StepStatus = "Success"
 		return string(response), err
 	}
 }
 
-func GetSystemName(event event) ([]string, error) {
+func GetSystemName(event event, StatusGetSystem *models.DetailedStatus) ([]string, error) {
+	StatusGetSystem.subStep = "GetSystemName"
 	url := fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata", event.DscIp, event.Port)
-	response, err := GetConfigDsc(url, event.DscIp, event.Port)
-
+	response, err := dsa.GetConfigDsc(url, &StatusGetSystem)
+	if err != nil {
+		fmt.Printf("\nResponse:%v\n", StatusGetSystem)
+		StatusGetSystem.StepStatus = "Failed"
+		StatusGetSystem.StepResponse = string(response)
+		StatusGetSystem.Error = err
+		StatusGetSystem.StatusCode = 500
+		return []string{"Failed to fetch media servers", ""}, err
+	}
 	var systems GetSystemNames
 	var Pog string
 	json.Unmarshal(response, &systems)
@@ -35,9 +55,11 @@ func GetSystemName(event event) ([]string, error) {
 	}
 
 	url = fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata/%s", event.DscIp, event.Port, Pog)
-	response, err = GetConfigDsc(url, event.DscIp, event.Port)
+	response, err = dsa.GetConfigDsc(url, &StatusGetSystem)
 	var jresponse GetSystem
 	json.Unmarshal(response, &jresponse)
+	data, _ := json.Marshal(jresponse)
+	fmt.Println(string(data))
 	var PogIps []string
 	for _, ip := range jresponse.Nodes {
 		PogIps = append(PogIps, ip.IPAddress[1])

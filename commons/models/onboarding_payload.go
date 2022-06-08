@@ -164,15 +164,16 @@ type CreateJob struct {
 	RestJobObjectsModels   []RestJobObjectsModels `json:"restJobObjectsModels"`
 	RestJobSettingsModel   RestJobSettingsModel   `json:"restJobSettingsModel"`
 }
-type RestJobDefinitionModel struct {
-	JobName            string `json:"jobName"`
-	DataDictionaryType string `json:"dataDictionaryType"`
-	JobType            string `json:"jobType"`
-	SourceSystem       string `json:"sourceSystem"`
-	SrcUserName        string `json:"srcUserName"`
-	SrcUserPassword    string `json:"srcUserPassword"`
-	TargetGroupName    string `json:"targetGroupName"`
-}
+
+// type RestJobDefinitionModel struct {
+// 	JobName            string `json:"jobName"`
+// 	DataDictionaryType string `json:"dataDictionaryType"`
+// 	JobType            string `json:"jobType"`
+// 	SourceSystem       string `json:"sourceSystem"`
+// 	SrcUserName        string `json:"srcUserName"`
+// 	SrcUserPassword    string `json:"srcUserPassword"`
+// 	TargetGroupName    string `json:"targetGroupName"`
+// }
 type RestJobObjectsModels struct {
 	ParentType string `json:"parentType"`
 	ObjectName string `json:"objectName"`
@@ -199,4 +200,90 @@ type OnboardingStatus struct {
 	StatusCode int
 	StatusMsg  []byte
 	Error      error
+}
+
+type DetailedStatus struct {
+	Step         string `json:"step"`
+	StepStatus   string `json:"stepStatus"`
+	StatusCode   int    `json:"statusCode"`
+	StepResponse string `json:"dsaStatus"`
+	Error        error  `json:"error"`
+	Details      string `json:"message"`
+}
+
+type ConfigMediaResponse struct {
+	Validationlist interface{}   `json:"validationlist"`
+	Status         string        `json:"status"`
+	ServerID       int           `json:"serverId"`
+	ServerName     string        `json:"serverName"`
+	Valid          bool          `json:"valid"`
+	Links          []interface{} `json:"links"`
+}
+
+type ConfigTGTResponse struct {
+	Validationlist interface{}   `json:"validationlist"`
+	Status         string        `json:"status"`
+	ComponentName  string        `json:"componentName"`
+	ComponentType  string        `json:"componentType"`
+	Valid          bool          `json:"valid"`
+	Links          []interface{} `json:"links"`
+}
+
+type ConfigSystemResponse struct {
+	Links          []interface{} `json:"links"`
+	Status         string        `json:"status"`
+	SystemName     string        `json:"systemName"`
+	TdpID          string        `json:"tdpId"`
+	Valid          bool          `json:"valid"`
+	Validationlist struct {
+		ClientValidationList []struct {
+			Links     []interface{} `json:"links"`
+			Message   string        `json:"message"`
+			ValStatus string        `json:"valStatus"`
+		} `json:"clientValidationList"`
+		Links                []interface{} `json:"links"`
+		ServerValidationList []struct {
+			Links     []interface{} `json:"links"`
+			Message   string        `json:"message"`
+			ValStatus string        `json:"valStatus"`
+		} `json:"serverValidationList"`
+	} `json:"validationlist"`
+	WarningList []struct {
+		JobWarningCode string        `json:"jobWarningCode"`
+		JobWarningText string        `json:"jobWarningText"`
+		Links          []interface{} `json:"links"`
+	} `json:"warningList"`
+}
+
+type CreateJobResponse struct {
+	Validationlist struct {
+		ClientValidationList []interface{} `json:"clientValidationList"`
+		ServerValidationList []struct {
+			ValStatus string        `json:"valStatus"`
+			Message   string        `json:"message"`
+			Links     []interface{} `json:"links"`
+		} `json:"serverValidationList"`
+		Links []interface{} `json:"links"`
+	} `json:"validationlist"`
+	Status  string        `json:"status"`
+	JobID   interface{}   `json:"jobId"`
+	JobName string        `json:"jobName"`
+	Valid   bool          `json:"valid"`
+	Links   []interface{} `json:"links"`
+}
+
+type ConfigAWSAppResponse struct {
+	Validationlist struct {
+		ClientValidationList []interface{} `json:"clientValidationList"`
+		ServerValidationList []struct {
+			ValStatus string        `json:"valStatus"`
+			Message   string        `json:"message"`
+			Links     []interface{} `json:"links"`
+		} `json:"serverValidationList"`
+		Links []interface{} `json:"links"`
+	} `json:"validationlist"`
+	Status      string        `json:"status"`
+	AwsAcctName string        `json:"awsAcctName"`
+	Valid       bool          `json:"valid"`
+	Links       []interface{} `json:"links"`
 }

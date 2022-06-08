@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
 func GetDsa(url string) (*http.Response, error) {
@@ -33,67 +34,81 @@ func PostDsa(url string, jsonString []byte) (*http.Response, error) {
 
 }
 
-func PostConfigDsc(url string, payload interface{}) (string, error) {
+func PostConfigDsc(url string, payload interface{}, DsaStatus *models.DetailedStatus) ([]byte, error) {
 
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	data, err := json.Marshal(payload)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(data))
 	if err != nil {
-		// msg := fmt.Sprintf("Unable to make PUT request for pod account service to set the active and inactive system for upgrading account %s: %v", accountId, err)
-		return "Failed", err
+		DsaStatus.StatusCode = 503
+		DsaStatus.StepResponse = "Failed to create http request"
+		DsaStatus.Error = err
+		return []byte(DsaStatus.StepResponse), err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	msg := "Hey there"
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return "failed", errors.New(msg)
+		DsaStatus.Error = err
+		DsaStatus.StatusCode = 502
+		DsaStatus.StepResponse = "DSA Gateway Timeout"
+		return []byte("Failed to invoke dsa api"), err
 	}
 	fmt.Println(resp.StatusCode)
 	if resp.StatusCode != 200 {
 		var res map[string]interface{}
 		json.NewDecoder(resp.Body).Decode(&res)
-
-		return "failed", errors.New(msg)
+		DsaStatus.Error = err
+		DsaStatus.StatusCode = resp.StatusCode
+		DsaStatus.StepResponse = resp.Status
+		return []byte("failed"), err
 	}
 	defer resp.Body.Close()
 	response, err := io.ReadAll(resp.Body)
 	if err != nil {
+		DsaStatus.Error = err
+		DsaStatus.StatusCode = 400
+		DsaStatus.StepResponse = string(response)
 		log.Fatalln(err)
 	}
-	return string(response), err
+	DsaStatus.Error = err
+	DsaStatus.StatusCode = resp.StatusCode
+	DsaStatus.StepResponse = resp.Status
+	return response, err
 }
 
-func GetConfigDsc(url string) ([]byte, error) {
-	fmt.Println(url)
+func GetConfigDsc(url string, DsaStatus *models.DetailedStatus) ([]byte, error) {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
-		fmt.Println("Failed to create http request")
-		msg := "Failed to create http request"
-		return []byte(msg), err
+		DsaStatus.StatusCode = 503
+		DsaStatus.StepResponse = "Failed to create http request"
+		DsaStatus.Error = err
+		return []byte(DsaStatus.StepResponse), err
 	}
-
-	msg := "Hey there"
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Printf("Failed to invoke dsa %s", err)
-
+		DsaStatus.Error = err
+		DsaStatus.StatusCode = 502
+		DsaStatus.StepResponse = "DSA Gateway Timeout"
+		return []byte("Failed to invoke dsa api"), err
 	}
 	defer resp.Body.Close()
 	response, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
-		fmt.Printf("Issue in invocation %s", err)
+		DsaStatus.Error = err
+		DsaStatus.StatusCode = 400
+		DsaStatus.StepResponse = string(response)
+		return response, err
 	}
-	fmt.Println(resp.StatusCode)
 	if resp.StatusCode != 200 {
-		var res map[string]interface{}
-		json.NewDecoder(resp.Body).Decode(&res)
-		fmt.Printf("Http non 200 response %s", err)
-
-		return response, errors.New(msg)
+		DsaStatus.Error = err
+		DsaStatus.StatusCode = resp.StatusCode
+		DsaStatus.StepResponse = resp.Status
+		return response, err
 	}
+	DsaStatus.Error = err
+	DsaStatus.StatusCode = resp.StatusCode
+	DsaStatus.StepResponse = resp.Status
+
 	return response, err
 }
