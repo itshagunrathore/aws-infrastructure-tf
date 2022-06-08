@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
@@ -16,12 +17,12 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 		return []string{"Failed to fetch media servers", ""}, err
 	}
 	var mediaPayload models.MediaServersConfig
-	var jresponse models.MediaResponse
+	var mediaResponse models.MediaResponse
 	var ipinfo models.IPInfo
-	json.Unmarshal(response, &jresponse)
-	data, _ := json.Marshal(jresponse)
-	fmt.Println(string(data))
-	for _, media := range jresponse.Medias {
+	json.Unmarshal(response, &mediaResponse)
+	data, _ := json.Marshal(mediaResponse)
+	log.Info(string(data))
+	for _, media := range mediaResponse.Medias {
 		mediaPayload.ServerName = media.ServerName
 		mediaPayload.PoolSharedPipes = 100
 		mediaPayload.Port = 15401
@@ -38,13 +39,13 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 		response, err := dsa.PostConfigDsc(url, mediaPayload, &StatusUpdateMedia)
 		if err != nil {
 			StatusUpdateMedia.StepStatus = "Failed"
-			StatusUpdateMedia.StepResponse = jresponse.Status
+			StatusUpdateMedia.StepResponse = mediaResponse.Status
 			StatusUpdateMedia.Error = err
 			StatusUpdateMedia.StatusCode = 500
 			return []string{"Failed to configure target group"}, err
 		} else {
 			json.Unmarshal(response, &configmediaresponse)
-			fmt.Println(response)
+			log.Info(response)
 			StatusUpdateMedia.StepStatus = "Success"
 			StatusUpdateMedia.StepResponse = configmediaresponse.Status
 			StatusUpdateMedia.Error = err
@@ -52,8 +53,8 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 		}
 		mediaPayload = models.MediaServersConfig{}
 	}
-	fmt.Printf("Value of media servers:%v\n", jresponse)
-	return []string{"Media updated"}, err
+	log.Info("Media server response:%v\n", mediaResponse)
+	return []string{"Media server updated"}, err
 }
 
 func GetMedia(event models.Event, StatusGetMedia *models.DetailedStatus) ([]string, error) {
@@ -62,16 +63,17 @@ func GetMedia(event models.Event, StatusGetMedia *models.DetailedStatus) ([]stri
 	url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
 	response, err := dsa.GetConfigDsc(url, &StatusGetMedia)
 	if err != nil {
+		log.Info("Failed to fetch media servers")
 		return []string{"Failed to fetch media servers", ""}, err
 	}
-	var jresponse models.MediaResponse
+	var mediaResponse models.MediaResponse
 
-	json.Unmarshal(response, &jresponse)
-	data, _ := json.Marshal(jresponse)
-	fmt.Println(string(data))
+	json.Unmarshal(response, &mediaResponse)
+	data, _ := json.Marshal(mediaResponse)
+	log.Info("Fetched media response: " + string(data))
 
 	var LiveMediaServer []string
-	for _, media := range jresponse.Medias {
+	for _, media := range mediaResponse.Medias {
 		for _, v := range media.Ips {
 			for j := 0; j < len(PogIps); j++ {
 				if PogIps[j] == v.IPAddress {

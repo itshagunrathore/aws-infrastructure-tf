@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/dsa"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
@@ -21,7 +22,6 @@ func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (s
 	}
 
 	for i, media := range mediaServers {
-		fmt.Println(i, media)
 		runtimePrefix.PrefixName = fmt.Sprintf("m%d/", i+1)
 		runtimePrefix.StorageDevices = 1
 		runtimeBuckets.BucketName = event.BucketName
@@ -39,7 +39,7 @@ func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (s
 	payload.Region = event.Region
 	payload.TargetGroupName = "TG_BAAS_GO3"
 
-	fmt.Println(payload)
+	log.Info(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/components/target-groups/s3", event.DscIp, event.Port)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusConfigTGT)
 	json.Unmarshal(response, &configtgtresponse)
@@ -48,7 +48,7 @@ func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (s
 		StatusConfigTGT.StepResponse = configtgtresponse.Status
 		return configtgtresponse.Status, err
 	} else {
-		fmt.Println(response)
+		log.Info("Configure targetgroup response: " + response)
 		StatusConfigTGT.StepStatus = "Success"
 		StatusConfigTGT.StepResponse = configtgtresponse.Status
 		StatusConfigTGT.Error = err

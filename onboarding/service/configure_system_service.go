@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
@@ -27,7 +28,7 @@ func ConfigureSystem(event event, StatusConfigSystem *models.DetailedStatus) (st
 		// StatusConfigSystem.StatusCode = int(response[])
 		return "Failed to configure system on dsc", err
 	} else {
-		var concfigsystemresponse ConfigSystemResponse
+		var concfigsystemresponse models.ConfigSystemResponse
 		json.Unmarshal(response, &concfigsystemresponse)
 		StatusConfigSystem.StepResponse = concfigsystemresponse.Status
 		StatusConfigSystem.StepStatus = "Success"
@@ -47,7 +48,7 @@ func GetSystemName(event event, StatusGetSystem *models.DetailedStatus) ([]strin
 		StatusGetSystem.StatusCode = 500
 		return []string{"Failed to fetch media servers", ""}, err
 	}
-	var systems GetSystemNames
+	var systems models.GetSystemNames
 	var Pog string
 	json.Unmarshal(response, &systems)
 	for _, system := range systems.Systems {
@@ -56,12 +57,12 @@ func GetSystemName(event event, StatusGetSystem *models.DetailedStatus) ([]strin
 
 	url = fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata/%s", event.DscIp, event.Port, Pog)
 	response, err = dsa.GetConfigDsc(url, &StatusGetSystem)
-	var jresponse GetSystem
-	json.Unmarshal(response, &jresponse)
-	data, _ := json.Marshal(jresponse)
+	var getSystemResponse models.GetSystem
+	json.Unmarshal(response, &getSystemResponse)
+	data, _ := json.Marshal(getSystemResponse)
 	fmt.Println(string(data))
 	var PogIps []string
-	for _, ip := range jresponse.Nodes {
+	for _, ip := range getSystemResponse.Nodes {
 		PogIps = append(PogIps, ip.IPAddress[1])
 	}
 

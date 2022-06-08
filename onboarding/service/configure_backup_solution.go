@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
@@ -34,7 +35,7 @@ func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	S3BucketsByRegion.Region = event.Region
 
 	payload.ConfigAwsRest.BucketsByRegion = append(payload.ConfigAwsRest.BucketsByRegion, S3BucketsByRegion)
-	fmt.Println(payload)
+	log.Info(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/components/backup-applications/aws-s3", event.DscIp, event.Port)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	json.Unmarshal(response, &configawsappresponse)
@@ -53,24 +54,21 @@ func GetAWSApp(event models.Event, StatusGetAWSApp *models.DetailedStatus) ([]by
 	StatusGetAWSApp.Step = "ConfigureAWSApp"
 	response, err := dsa.GetConfigDsc(url, &StatusGetAWSApp)
 	if err != nil {
-		fmt.Println("Back to GetAWSApp function with error")
+		log.Info("Back to GetAWSApp function with error")
 		StatusGetAWSApp.StepStatus = "Failed"
-		// StatusAWSApp.StepResponse = "Failed to configure aws_app"
 		StatusGetAWSApp.Error = err
-		fmt.Printf("Dsa new response : %v", StatusGetAWSApp)
-		// StatusAWSApp.StatusCode =
+		log.Info("Dsa new response : %v", StatusGetAWSApp)
 		return response, err
 	} else {
-		var jresponse models.GetSystem
-		json.Unmarshal(response, &jresponse)
+		var getSystemResponse models.GetSystem
+		json.Unmarshal(response, &getSystemResponse)
 		StatusGetAWSApp.StepStatus = "Success"
-		StatusGetAWSApp.StepResponse = jresponse.Status
+		StatusGetAWSApp.StepResponse = getSystemResponse.Status
 		StatusGetAWSApp.Error = err
 		StatusGetAWSApp.StatusCode = 200
 		fmt.Printf("Dsa new response : %v", StatusGetAWSApp)
-		data, _ := json.Marshal(jresponse)
-		fmt.Println(string(data))
+		data, _ := json.Marshal(getSystemResponse)
+		log.Info(string(data))
 		return response, err
-		// return jresponse.Status, err
 	}
 }

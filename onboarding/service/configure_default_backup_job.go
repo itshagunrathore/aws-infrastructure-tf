@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
@@ -37,7 +38,7 @@ func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	payload.RestJobSettingsModel.TemperatureOverride = "DEFAULT"
 	payload.RestJobSettingsModel.TrackEmptyTables = false
 
-	fmt.Println(payload)
+	log.Info(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/jobs", event.DscIp, event.Port)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	if err != nil {
