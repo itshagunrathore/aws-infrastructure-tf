@@ -8,6 +8,7 @@ type DsaClientSession struct {
 	TimeCreated     time.Time `gorm:"column:time_created;not null"`
 	TimeUpdated     time.Time `gorm:"column:time_updated;not null"`
 	IsDeleted       bool      `gorm:"is_deleted;default=false"`
+	AccountId       string    `gorm:"account_id;not null"`
 }
 
 func (d *DsaClientSession) TableName() string {

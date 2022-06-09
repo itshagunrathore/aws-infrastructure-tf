@@ -6,7 +6,9 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/spf13/viper"
 	podaccountservice "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/pod_account_service"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/dtos"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/entities"
@@ -35,7 +37,7 @@ func NewDsaService(r repositories.DsaClientSessionRepository) *dsaService {
 }
 func (d *dsaService) ProvisionDsaService(accountId string) error {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
-	baseurl := "http://localhost:5500"
+	baseurl := viper.GetString("dummyUrl")
 
 	var provisionDsaResponseDto dtos.ProvisionDsaDtos
 	var provisionDsaEntity entities.DsaClientSession
@@ -49,13 +51,14 @@ func (d *dsaService) ProvisionDsaService(accountId string) error {
 	if err != nil {
 		return err
 	}
+	log.Info(resp)
 	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return err
 		}
 		json.Unmarshal(body, &provisionDsaResponseDto)
-		provisionDsaEntity = mappers.NewDsaMapper().MapProvisionDsaResponse(provisionDsaResponseDto)
+		provisionDsaEntity = mappers.NewDsaMapper().MapProvisionDsaResponse(provisionDsaResponseDto, accountId)
 		d.DsaClientSessionRepository.Post(provisionDsaEntity)
 		return nil
 	}
