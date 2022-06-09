@@ -8,13 +8,13 @@ import (
 )
 
 func DsmainRestart(event models.Event, DsmainStatus *models.DetailedStatus) string {
-	response := utils.DsmainRestart(event.dsaIp, event.tenantId, event.TPASystemId, event.cloudPlatform)()
+	response := utils.DsmainRestart(event.dsaIp, event.tenantId, event.TPASystemId, event.cloudPlatform, event.Region)()
 	if !response {
 		fmt.Printf("DSMAIN restart failed")
 		DsmainStatus.StepStatus = "Failed"
+		return "DSMAIN restart failed"
 	} else {
 		DsmainStatus.StepStatus = "Success"
 		return "DSMAIN restart Success"
 	}
-
 }

@@ -12,38 +12,35 @@ type SecretData struct {
 	SshKey string `json:"mongo_user"`
 }
 
-var (
-	secretName   string = "pod-tenant-%s-%s_sshkey"
-	region       string = "us-west-2"
-	versionStage string = "AWSCURRENT"
-)
+var versionStage string = "AWSCURRENT"
 
-func GetSecret(tenantId string, TPASystemId string, cloudPlatform string) string {
+func GetSecret(secretName string, region string, cloudPlatform string) (string, error) {
 	var secretKey string
+	var err error
 	switch cloudPlatform {
 	case "AWS":
-		secretKey = GetAwsSecret(tenantId, TPASystemId)
+		secretKey, err = GetAwsSecret(secretName, region)
 	case "AZURE":
-		secretKey = GetAzureSecret(tenantId, TPASystemId)
+		secretKey, err = GetAzureSecret(secretName, region)
 	case "GCP":
-		secretKey = GetGcpSecret(tenantId, TPASystemId)
+		secretKey, err = GetGcpSecret(secretName, region)
 	}
-	return secretKey
+	return secretKey, err
 }
-func GetAwsSecret(tenantId string, TPASystemId string) string {
+func GetAwsSecret(secretName string, region string) (string, error) {
 	svc := secretsmanager.New(
 		session.New(),
 		aws.NewConfig().WithRegion(region),
 	)
 
 	input := &secretsmanager.GetSecretValueInput{
-		SecretId:     aws.String(fmt.Sprintf(secretName, tenantId, TPASystemId)),
+		SecretId:     aws.String(secretName),
 		VersionStage: aws.String(versionStage),
 	}
 
 	result, err := svc.GetSecretValue(input)
 	if err != nil {
-		panic(err.Error())
+		return result, err
 	}
 
 	var secretString string
@@ -51,13 +48,17 @@ func GetAwsSecret(tenantId string, TPASystemId string) string {
 		secretString = *result.SecretString
 		fmt.Println(secretString)
 	}
-	return secretString
+	return secretString, err
 }
 
-func GetAzureSecret(tenantId string, TPASystemId string) string {
+func GetAzureSecret(secretName string, region string) (string, error) {
 	//TODO add Azure code here
+	var err error
+	return secretName, err
 }
 
-func GetGcpSecret(tenantId string, TPASystemId string) string {
+func GetGcpSecret(secretName string, region string) (string, error) {
 	//TODO add Gcp code here
+	var err error
+	return secretName, err
 }

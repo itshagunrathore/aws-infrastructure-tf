@@ -5,16 +5,24 @@ import (
 	"fmt"
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/utils"
 )
 
 // var StatusGetSystem models.DsaResponse
 
-func ConfigureSystem(event event, StatusConfigSystem *models.DetailedStatus) (string, error) {
+func ConfigureSystem(event models.Event, StatusConfigSystem *models.DetailedStatus) (string, error) {
 	StatusConfigSystem.Step = "ConfigureSystem"
-	var payload DsaSystem
-	payload.Password = event.Db_password
-	payload.User = event.Db_user
+	var payload models.DsaSystem
+	barUserSecretName := fmt.Sprintf("%s_TDaaS_BAR", event.accountId)
+	barUserPassword, err := utils.GetSecret(barUserSecretName, event.Region, event.cloudPlatform)
+	if err != nil {
+		log.Error(err)
+		return "Failed to fetch baruser password", err
+	}
+	payload.Password = barUserPassword
+	payload.User = "TDaaS_BAR"
 	payload.SkipForceFull = true
 	// payload.SoftLimit = 1
 	payload.SystemName = event.SystemName
