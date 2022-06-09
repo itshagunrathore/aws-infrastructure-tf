@@ -29,9 +29,15 @@ func onboarding(c *gin.Context) {
 	if dscState == "running" {
 		_, err := service.ConfigureSystem(payload, &Response)
 		if err == nil {
+			Response.OnboardingStatus = "Failed"
+			Response.CustomerAccount = payload.AcctName
+			log.Error(Response)
 			response.SuccessResponseHandler(c, Response, Response.StatusCode)
 			return
 		} else {
+			Response.OnboardingStatus = "Success"
+			Response.CustomerAccount = payload.AcctName
+			log.Error(Response)
 			response.ErrorResponseHandler(c, err, Response.StatusCode)
 			return
 		}

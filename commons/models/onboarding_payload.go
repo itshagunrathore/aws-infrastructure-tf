@@ -36,17 +36,18 @@ type DsaResponse struct {
 	Message string `json:"message"`
 }
 
-type event struct {
+type Event struct {
 	DscIp          string `json:"dscIp"`
 	PogNodeIp      string `json:"pogNodeIp"`
 	Port           string `json:"port","default:"9090"`
 	AwsAccountName string `json:"acctName,omitempty"`
 	Region         string `json:"region,omitempty"`
 	BucketName     string `json:"bucketName,omitempty"`
-	Db_password    string `json:"dbPassword"`
-	Db_user        string `json:"dbUser"`
 	SystemName     string `json:"systemName"`
 	RoleName       string `json:"roleName`
+	TPAId          string `json:"tpaId"`
+	PodId          string `json:"podId"`
+	CloudPlatform  string `json:"cloudPlatform"`
 }
 
 // media server struct
@@ -203,12 +204,14 @@ type OnboardingStatus struct {
 }
 
 type DetailedStatus struct {
-	Step         string `json:"step"`
-	StepStatus   string `json:"stepStatus"`
-	StatusCode   int    `json:"statusCode"`
-	StepResponse string `json:"dsaStatus"`
-	Error        error  `json:"error"`
-	Details      string `json:"message"`
+	Step             string `json:"step"`
+	StepStatus       string `json:"step_status"`
+	StatusCode       int    `json:"status_code"`
+	StepResponse     string `json:"dsa_status"`
+	Error            error  `json:"error"`
+	Details          string `json:"message"`
+	CustomerAccount  string `json:"account_id"`
+	OnboardingStatus string `json:"onboarding_status"`
 }
 
 type ConfigMediaResponse struct {
