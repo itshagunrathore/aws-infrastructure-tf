@@ -24,13 +24,11 @@ func runShellCmd(client *ssh.Client, pogIP string, cmd string) (connectErr error
 	defer session.Close()
 
 	session.Stdout = &buff
-
+	log.Info("Executing command:\t" + cmd)
 	err = session.Run(cmd)
 	stdout := buff.String()
 	msg = fmt.Sprintf("%v", stdout)
-	fmt.Println(cmd)
-	fmt.Println(msg)
-
+	log.Info(msg)
 	return nil, err, &stdout
 }
 
@@ -46,7 +44,7 @@ func DsmainRestart(pogIP string, tenantId string, tpaSystemId string, cloudPlatf
 	signer, err := ssh.ParsePrivateKey([]byte(secretKey))
 	if err != nil {
 		msg := fmt.Sprintf("Error while parsing the TPA_PRIMARY Secret String: %v", err)
-		fmt.Println(msg)
+		log.Error(msg)
 		return false
 	}
 
@@ -62,7 +60,7 @@ func DsmainRestart(pogIP string, tenantId string, tpaSystemId string, cloudPlatf
 	client, err := ssh.Dial("tcp", pogIP+":22", config)
 	if err != nil {
 		msg := fmt.Sprintf("Error while setting up SSH client to the TPA_PRIMARY system ip: %s, error: %s", pogIP, err)
-		fmt.Println(msg)
+		log.Error(msg)
 		return false
 	}
 	defer client.Close()
@@ -73,7 +71,7 @@ func DsmainRestart(pogIP string, tenantId string, tpaSystemId string, cloudPlatf
 			return false
 		} else if cmdErr != nil {
 			msg := fmt.Sprintf("Unexpected error running the cmd '%s' to the TPA_PRIMARY system ip: %s, error: %s", cmd, pogIP, cmdErr)
-			fmt.Println(msg)
+			log.Error(msg)
 			return false
 		}
 		// return true

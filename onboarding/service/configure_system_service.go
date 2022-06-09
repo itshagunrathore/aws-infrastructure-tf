@@ -27,7 +27,7 @@ func ConfigureSystem(event models.Event, StatusConfigSystem *models.DetailedStat
 	// payload.SoftLimit = 1
 	payload.SystemName = event.SystemName
 	payload.TdpID = event.SystemName
-	fmt.Println(payload)
+	log.Info(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata", event.DscIp, event.Port)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusConfigSystem)
 	if err != nil {
@@ -68,7 +68,7 @@ func GetSystemName(event event, StatusGetSystem *models.DetailedStatus) ([]strin
 	var getSystemResponse models.GetSystem
 	json.Unmarshal(response, &getSystemResponse)
 	data, _ := json.Marshal(getSystemResponse)
-	fmt.Println(string(data))
+	log.Info(string(data))
 	var PogIps []string
 	for _, ip := range getSystemResponse.Nodes {
 		PogIps = append(PogIps, ip.IPAddress[1])

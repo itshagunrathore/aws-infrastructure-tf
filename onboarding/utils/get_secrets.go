@@ -1,11 +1,10 @@
 package utils
 
 import (
-	"fmt"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 )
 
 type SecretData struct {
@@ -46,7 +45,7 @@ func GetAwsSecret(secretName string, region string) (string, error) {
 	var secretString string
 	if result.SecretString != nil {
 		secretString = *result.SecretString
-		fmt.Println(secretString)
+		log.Error(secretString)
 	}
 	return secretString, err
 }
