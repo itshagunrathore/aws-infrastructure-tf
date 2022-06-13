@@ -18,7 +18,7 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 	}
 	var mediaPayload models.MediaServersConfig
 	var mediaResponse models.MediaResponse
-	var ipinfo models.IPInfo
+	var ipInfo models.IPInfo
 	json.Unmarshal(response, &mediaResponse)
 	data, _ := json.Marshal(mediaResponse)
 	log.Info(string(data))
@@ -27,12 +27,12 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 		mediaPayload.PoolSharedPipes = 100
 		mediaPayload.Port = 15401
 		for _, netmask := range media.Ips {
-			ipinfo.IPAddress = netmask.IPAddress
-			ipinfo.Netmask = "255.255.255.255"
-			fmt.Printf("\nCurrent Media ip:%v\n", ipinfo)
-			mediaPayload.IPInfo = append(mediaPayload.IPInfo, ipinfo)
+			ipInfo.IPAddress = netmask.IPAddress
+			ipInfo.Netmask = "255.255.255.255"
+			fmt.Printf("\nCurrent Media ip:%v\n", ipInfo)
+			mediaPayload.IPInfo = append(mediaPayload.IPInfo, ipInfo)
 			fmt.Printf("\nCurrent Media payload ip:%v\n", mediaPayload.IPInfo)
-			ipinfo = models.IPInfo{}
+			ipInfo = models.IPInfo{}
 		}
 		url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
 		var configmediaresponse models.ConfigMediaResponse
@@ -58,7 +58,7 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 }
 
 func GetMedia(event models.Event, StatusGetMedia *models.DetailedStatus) ([]string, error) {
-	PogIps, err := dsa.GetSystemName(event, &StatusGetMedia)
+	pogIps, err := dsa.GetSystemName(event, &StatusGetMedia)
 
 	url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
 	response, err := dsa.GetConfigDsc(url, &StatusGetMedia)
@@ -75,8 +75,8 @@ func GetMedia(event models.Event, StatusGetMedia *models.DetailedStatus) ([]stri
 	var LiveMediaServer []string
 	for _, media := range mediaResponse.Medias {
 		for _, v := range media.Ips {
-			for j := 0; j < len(PogIps); j++ {
-				if PogIps[j] == v.IPAddress {
+			for j := 0; j < len(pogIps); j++ {
+				if pogIps[j] == v.IPAddress {
 					LiveMediaServer = append(LiveMediaServer, media.ServerName)
 				}
 

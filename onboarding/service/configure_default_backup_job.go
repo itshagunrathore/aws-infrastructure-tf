@@ -13,7 +13,7 @@ func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	StatusAWSApp.Step = "CreateDefaultJob"
 	var payload models.CreateJob
 	var backupObjects models.RestJobObjectsModels
-	var createjobresponse models.CreateJobResponse
+	var createJobResponse models.CreateJobResponse
 	backupObjects.IncludeAll = false
 	backupObjects.ObjectName = "DBC"
 	backupObjects.ObjectType = "DATABASE"
@@ -42,10 +42,10 @@ func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	url := fmt.Sprintf("https://%s:%s/dsa/jobs", event.DscIp, event.Port)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	if err != nil {
-		data := json.Unmarshal(response, &createjobresponse)
+		data := json.Unmarshal(response, &createJobResponse)
 		fmt.Printf("DSA output:%v", data)
 		StatusAWSApp.StepStatus = "Failed"
-		StatusAWSApp.StepResponse = createjobresponse.Status
+		StatusAWSApp.StepResponse = createJobResponse.Status
 		return "Failed to configure target group", err
 	} else {
 		StatusAWSApp.StepStatus = "Success"

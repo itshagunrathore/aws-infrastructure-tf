@@ -42,8 +42,8 @@ func onboarding(c *gin.Context) {
 			return
 		}
 	} else {
-		apiresponse := dscStatus("start")
-		log.Info(apiresponse)
+		apiResponse := dscStatus("start")
+		log.Info(apiResponse)
 		response.ErrorResponseHandler(c, err, Response.StatusCode)
 		return
 	}
@@ -60,16 +60,16 @@ func runjob(c *gin.Context) {
 
 func dscStatus(operation string) string {
 	// TODO dsc status code here
-	var apiresponse string
+	var apiResponse string
 	switch operation {
 	case "status":
-		apiresponse = "running"
+		apiResponse = "running"
 	case "start":
-		apiresponse = "starting dsc"
+		apiResponse = "starting dsc"
 	case "stop":
-		apiresponse = "stopping dsc"
+		apiResponse = "stopping dsc"
 	}
-	return apiresponse
+	return apiResponse
 }
 
 func main() {

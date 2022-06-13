@@ -44,7 +44,7 @@ func ConfigureSystem(event models.Event, StatusConfigSystem *models.DetailedStat
 	}
 }
 
-func GetSystemName(event event, StatusGetSystem *models.DetailedStatus) ([]string, error) {
+func GetSystemName(event models.Event, StatusGetSystem *models.DetailedStatus) ([]string, error) {
 	StatusGetSystem.subStep = "GetSystemName"
 	url := fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata", event.DscIp, event.Port)
 	response, err := dsa.GetConfigDsc(url, &StatusGetSystem)

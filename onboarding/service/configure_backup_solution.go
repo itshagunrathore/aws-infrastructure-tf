@@ -18,7 +18,7 @@ func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	if err != nil {
 		return "Failed to get Media server names", err
 	}
-	var configawsappresponse models.ConfigAWSAppResponse
+	var configAwsAppResponse models.ConfigAWSAppResponse
 	var runtimePrefix models.PrefixList
 	var buckets models.Buckets
 	var S3BucketsByRegion models.BucketsByRegion
@@ -38,13 +38,13 @@ func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	log.Info(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/components/backup-applications/aws-s3", event.DscIp, event.Port)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
-	json.Unmarshal(response, &configawsappresponse)
+	json.Unmarshal(response, &configAwsAppResponse)
 	if err != nil {
-		StatusAWSApp.StepResponse = configawsappresponse.Status
+		StatusAWSApp.StepResponse = configAwsAppResponse.Status
 		StatusAWSApp.StepStatus = "Failed"
 		return "Failed to configure target group", err
 	} else {
-		StatusAWSApp.StepResponse = configawsappresponse.Status
+		StatusAWSApp.StepResponse = configAwsAppResponse.Status
 		StatusAWSApp.StepStatus = "Success"
 		return string(response), err
 	}
