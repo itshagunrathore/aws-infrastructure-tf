@@ -33,3 +33,10 @@ func (m *dsaRespMapper) MapDsaClientSessionGetRequest(accountId string) entities
 	dsaClientSessionEntity.IsDeleted = false
 	return dsaClientSessionEntity
 }
+func (m *dsaRespMapper) MapDeprovisionRequestUpdate(clientSessionId string) entities.DsaClientSession {
+	var dsaClientSessionEntity entities.DsaClientSession
+	dsaClientSessionEntity.ClientSessionId = clientSessionId
+	dsaClientSessionEntity.IsDeleted = true
+	dsaClientSessionEntity.TimeUpdated = time.Now().UTC()
+	return dsaClientSessionEntity
+}

@@ -1,12 +1,8 @@
 package services
 
 import (
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"reflect"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -15,7 +11,6 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/dtos"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/entities"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/helpers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/mappers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/repositories"
@@ -46,14 +41,11 @@ func NewDsaService(r repositories.DsaClientSessionRepository) *dsaService {
 func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string) error {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
 	baseurl := viper.GetString("dummyUrl")
-	var provisionDsaResponseDto dtos.ProvisionDsaDtos
-	var provisionDsaEntity entities.DsaClientSession
-	mappers := mappers.NewDsaMapper()
 
 	// check if dsa is already provisioned
 	dsaStatusResp, err := d.GetDsaStatusService(context, accountId)
-	log.Infow(fmt.Sprintf("Response from get dsa service: %v", dsaStatusResp), "baas-trace-id", context.Value("baas-trace-id"))
-	if err != nil {
+	log.Infow(fmt.Sprintf("Response from get dsa service: %v", dsaStatusResp.Error), "baas-trace-id", context.Value("baas-trace-id"))
+	if err != nil && reflect.TypeOf(err) != reflect.TypeOf(customerrors.DsaResourceNotFoundError{}) {
 		return err
 	}
 	err = helpers.NewDsaHelper().CheckDsaStatus(dsaStatusResp)
@@ -70,38 +62,21 @@ func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string)
 	if err != nil {
 		return err
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	provisionDsaEntity, err := helpers.NewDsaHelper().ProvisionDsaHelper(resp, accountId, context)
 	if err != nil {
 		return err
 	}
-	log.Infow(fmt.Sprintf("pod-account-service response, statusCode: %v, body %v", resp.StatusCode, string(body)), "baas-trace-id", context.Value("baas-trace-id"))
+	return d.DsaClientSessionRepository.Post(provisionDsaEntity)
 
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
-		json.Unmarshal(body, &provisionDsaResponseDto)
-		provisionDsaEntity = mappers.MapProvisionDsaResponse(provisionDsaResponseDto, accountId)
-		err := d.DsaClientSessionRepository.Post(provisionDsaEntity)
-		if err != nil {
-			return err
-		}
-		return nil
-	} else if resp.StatusCode == http.StatusMethodNotAllowed {
-		return customerrors.DsaAlreadyProvisionedError{Message: fmt.Sprintf("Dsa already provisioned by %v", ClientName)}
-	} else {
-		msg, err := helpers.NewDsaHelper().GetErrorMessage(resp)
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("error provisioning dsa: %v", msg)
-	}
 }
 
 func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId string) error {
 
 	// check and get the latest clientSessionId to deprovision for the account
-	dsaClientSessionEntity := mappers.NewDsaMapper().MapDsaClientSessionGetRequest(accountId)
-	dsaClientSession, err := d.DsaClientSessionRepository.Get(dsaClientSessionEntity)
+	getDsaClientSessionEntity := mappers.NewDsaMapper().MapDsaClientSessionGetRequest(accountId)
+	dsaClientSession, err := d.DsaClientSessionRepository.Get(getDsaClientSessionEntity)
 	if reflect.TypeOf(err) == reflect.TypeOf(gorm.ErrRecordNotFound) {
-		return customerrors.DsaNotProvisionedError{Message: "Dsa has not been provisioned for this account"}
+		return customerrors.NewDsaNotProvisionedError("Dsa has not been provisioned for this account")
 	} else if err != nil {
 		return err
 	}
@@ -116,23 +91,13 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 	if err != nil {
 		return err
 	}
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
-		dsaClientSessionEntity.IsDeleted = true
-		dsaClientSessionEntity.TimeUpdated = time.Now().UTC()
-		err := d.DsaClientSessionRepository.Update(dsaClientSessionEntity)
-		if err != nil {
-			return err
-		}
-		return nil
-	} else if resp.StatusCode == http.StatusNotFound {
-		return customerrors.AccountDoesntExistError{Message: fmt.Sprintf("Account %v doesnt exist", accountId)}
-	} else {
-		msg, err := helpers.NewDsaHelper().GetErrorMessage(resp)
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("error deprovisioning dsa: %v", msg)
+
+	dsaClientSessionEntityResp, err := helpers.NewDsaHelper().DeprovisionDsaHelper(resp, dsaClientSession.ClientSessionId)
+	if err != nil {
+		return err
 	}
+
+	return d.DsaClientSessionRepository.Update(dsaClientSessionEntityResp)
 
 }
 
@@ -147,9 +112,6 @@ func (d *dsaService) GetDsaStatusService(context *gin.Context, accountId string)
 	if err != nil {
 		return getDsaStatusDto, err
 	}
-	getDsaStatusDto, err = helpers.NewDsaHelper().GetDsaStatusHelper(resp, accountId)
-	if err != nil {
-		return getDsaStatusDto, err
-	}
-	return getDsaStatusDto, nil
+	return helpers.NewDsaHelper().GetDsaStatusHelper(resp, accountId)
+
 }
