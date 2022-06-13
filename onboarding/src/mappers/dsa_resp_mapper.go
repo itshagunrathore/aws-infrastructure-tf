@@ -9,6 +9,7 @@ import (
 
 type DsaRespMapper interface {
 	MapProvisionDsaResponse() entities.DsaClientSession
+	MapDsaClientSessionGetRequest(accountId string) entities.DsaClientSession
 }
 
 type dsaRespMapper struct {
@@ -25,4 +26,10 @@ func (m *dsaRespMapper) MapProvisionDsaResponse(provisionDsaResponseDto dtos.Pro
 	dsaProvisioningDtos.TimeUpdated = time.Now().UTC()
 	dsaProvisioningDtos.AccountId = accountId
 	return dsaProvisioningDtos
+}
+func (m *dsaRespMapper) MapDsaClientSessionGetRequest(accountId string) entities.DsaClientSession {
+	var dsaClientSessionEntity entities.DsaClientSession
+	dsaClientSessionEntity.AccountId = accountId
+	dsaClientSessionEntity.IsDeleted = false
+	return dsaClientSessionEntity
 }

@@ -6,7 +6,7 @@ import (
 )
 
 type DsaClientSessionRepository interface {
-	Get() (entities.DsaClientSession, error)
+	Get(dsaClientSessionEntity entities.DsaClientSession) (entities.DsaClientSession, error)
 	Post(entities.DsaClientSession) error
 	Update(entities.DsaClientSession) error
 }
@@ -21,13 +21,13 @@ func NewDsaClientSessionRepository(DB db.PostgresDB) DsaClientSessionRepository 
 }
 
 //this will return the latest row in the database
-func (d *dsaClientSessionRepository) Get() (entities.DsaClientSession, error) {
-	var dsaClientSessionEntity entities.DsaClientSession
-	err := d.DB.DB().Table(dsaClientSessionEntity.TableName()).Last(&dsaClientSessionEntity).Error
+func (d *dsaClientSessionRepository) Get(dsaClientSessionEntity entities.DsaClientSession) (entities.DsaClientSession, error) {
+	var resp entities.DsaClientSession
+	err := d.DB.DB().Where(&dsaClientSessionEntity).Last(&resp).Error
 	if err != nil {
-		return entities.DsaClientSession{}, err
+		return resp, err
 	}
-	return dsaClientSessionEntity, nil
+	return resp, nil
 }
 
 func (d *dsaClientSessionRepository) Post(e entities.DsaClientSession) error {

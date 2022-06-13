@@ -20,6 +20,8 @@ func (r *RouterStruct) InitiateDSARoutes(dsaService services.DsaService) {
 	dsaHandlers := handlers.NewDsaHandler(dsaService)
 	r.router.Engine.Use(middlewares.Tracer())
 	r.router.Engine.POST("/v1/accounts/:account-id/dsa", dsaHandlers.ProvisionDsa)
+	r.router.Engine.GET("/v1/accounts/:account-id/dsa", dsaHandlers.GetDsaStatus)
+	r.router.Engine.DELETE("/v1/accounts/:account-id/dsa", dsaHandlers.DeprovisionDsa)
 	r.router.Engine.GET("/ping", dsaHandlers.Ping)
 }
 
