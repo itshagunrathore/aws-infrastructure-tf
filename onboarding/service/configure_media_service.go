@@ -11,7 +11,7 @@ import (
 )
 
 func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedStatus) ([]string, error) {
-	url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.MediaServer)
 	log.Info("Invoking dsa api: %s", url)
 	response, err := dsa.GetConfigDsc(url, &StatusUpdateMedia)
 	if err != nil {
@@ -37,7 +37,7 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 			log.Info("\nCurrent Media payload ip:%v\n", mediaPayload.IPInfo)
 			ipInfo = models.IPInfo{}
 		}
-		url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
+		url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.MediaServer)
 		var configmediaresponse models.ConfigMediaResponse
 		response, err := dsa.PostConfigDsc(url, mediaPayload, &StatusUpdateMedia)
 		if err != nil {
@@ -63,7 +63,7 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 func GetMedia(event models.Event, StatusGetMedia *models.DetailedStatus) ([]string, error) {
 	pogIps, err := service.GetSystemName(event, &StatusGetMedia)
 
-	url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.MediaServer)
 	response, err := dsa.GetConfigDsc(url, &StatusGetMedia)
 	if err != nil {
 		log.Info("Failed to fetch media servers")

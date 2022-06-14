@@ -10,6 +10,21 @@ import (
 )
 
 func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (string, error) {
+	var response string
+	var err error
+	switch event.CloudPlatform {
+	case "AWS":
+		response, err = ConfigureAwsTGT(event, StatusConfigTGT)
+	case "AZURE":
+		response, err = ConfigureAzureTGT(event, StatusConfigTGT)
+	case "GCP":
+		response, err = ConfigureGcpTGT(event, StatusConfigTGT)
+	}
+	return response, err
+
+}
+
+func ConfigureAwsTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (string, error) {
 	StatusConfigTGT.Step = "ConfigureTargetGroup"
 	var payload models.TgtPayload
 	var runtimeBuckets models.Buckets
@@ -40,7 +55,7 @@ func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (s
 	payload.TargetGroupName = "TG_BAAS"
 
 	log.Info(payload)
-	url := fmt.Sprintf("https://%s:%s/dsa/components/target-groups/s3", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.ConfigAwsTGT)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusConfigTGT)
 	json.Unmarshal(response, &configtgtresponse)
 	if err != nil {
@@ -55,3 +70,6 @@ func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (s
 		return configtgtresponse.Status, err
 	}
 }
+
+func ConfigureAzureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (string, error) {}
+func ConfigureGcpTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (string, error)   {}

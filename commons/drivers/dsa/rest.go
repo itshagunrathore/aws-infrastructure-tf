@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -55,7 +54,6 @@ func PostConfigDsc(url string, payload interface{}, DsaStatus *models.DetailedSt
 		DsaStatus.StepResponse = "DSA Gateway Timeout"
 		return []byte("Failed to invoke dsa api"), err
 	}
-	fmt.Println(resp.StatusCode)
 	if resp.StatusCode != 200 {
 		var res map[string]interface{}
 		json.NewDecoder(resp.Body).Decode(&res)

@@ -42,7 +42,7 @@ func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	payload.RestJobSettingsModel.TrackEmptyTables = false
 
 	log.Info(payload)
-	url := fmt.Sprintf("https://%s:%s/dsa/jobs", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.ConfigureJob)
 	log.Info("invoking dsa api: %s", url)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	if err != nil {

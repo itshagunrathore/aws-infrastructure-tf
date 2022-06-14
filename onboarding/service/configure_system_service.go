@@ -26,7 +26,7 @@ func ConfigureSystem(event models.Event, StatusConfigSystem *models.DetailedStat
 	payload.SystemName = event.SystemName
 	payload.TdpID = event.SystemName
 	log.Info(payload)
-	url := fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.ConfigSystem)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusConfigSystem)
 	if err != nil {
 		StatusConfigSystem.Error = err
@@ -44,7 +44,7 @@ func ConfigureSystem(event models.Event, StatusConfigSystem *models.DetailedStat
 
 func GetSystemName(event models.Event, StatusGetSystem *models.DetailedStatus) ([]string, error) {
 	StatusGetSystem.SubStep = "GetSystemName"
-	url := fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.ConfigSystem)
 	response, err := dsa.GetConfigDsc(url, &StatusGetSystem)
 	if err != nil {
 		log.Info("\nResponse:%v\n", StatusGetSystem)
@@ -57,11 +57,12 @@ func GetSystemName(event models.Event, StatusGetSystem *models.DetailedStatus) (
 	var systems models.GetSystemNames
 	var Pog string
 	json.Unmarshal(response, &systems)
+	// User System name from payload
 	for _, system := range systems.Systems {
 		Pog = system.SystemName
 	}
 
-	url = fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata/%s", event.DscIp, event.Port, Pog)
+	url = fmt.Sprintf("https://%s:%s%s/%s", event.DscIp, event.Port, models.ConfigSystem, Pog)
 	response, err = dsa.GetConfigDsc(url, &StatusGetSystem)
 	var getSystemResponse models.GetSystem
 	json.Unmarshal(response, &getSystemResponse)

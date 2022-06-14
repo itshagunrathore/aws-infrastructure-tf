@@ -49,7 +49,7 @@ func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 
 	payload.ConfigAwsRest.BucketsByRegion = append(payload.ConfigAwsRest.BucketsByRegion, S3BucketsByRegion)
 	log.Info(payload)
-	url := fmt.Sprintf("https://%s:%s/dsa/components/backup-applications/aws-s3", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.AwsApp)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	json.Unmarshal(response, &configAwsAppResponse)
 	if err != nil {
@@ -63,7 +63,7 @@ func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	}
 }
 func GetApp(event models.Event, StatusGetAWSApp *models.DetailedStatus) ([]byte, error) {
-	url := fmt.Sprintf("https://%s:%s/dsa/components/backup-applications/aws-s3", event.DscIp, event.Port)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.AwsApp)
 	StatusGetAWSApp.Step = "ConfigureAWSApp"
 	response, err := dsa.GetConfigDsc(url, &StatusGetAWSApp)
 	if err != nil {

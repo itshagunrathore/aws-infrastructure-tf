@@ -8,5 +8,5 @@ import (
 
 func OnboardNewJob(event models.Event) {
 	newJob := entities.Tenant{CustomerName: event.CustomerName}
-	repositories.OnboardNewTenant(newSite)
+	repositories.OnboardNewTenant(newJob)
 }
