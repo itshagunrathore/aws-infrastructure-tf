@@ -1,6 +1,6 @@
 {
   "dbConfig": {
-    "dbName": "baas_devf",
+    "dbName": "baas_dev_",
     "host": "localhost",
     "password": "xxxx",
     "port": 5432,
