@@ -2,14 +2,7 @@ package main
 
 import (
 	"fmt"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/routers"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/services"
 	"os"
-<<<<<<< HEAD
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
@@ -17,15 +10,10 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/routers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/services"
-)
-
-func main() {
-=======
 )
 
 func main() {
 	// TODO parse stage from config
->>>>>>> cb617580f7e540b5109a595dbdc81d6aa6c40d39
 	log.InitiateLogger("INFO", "dev")
 	router := web.NewRouter()
 	r := routers.NewRoute(*router)
@@ -37,10 +25,7 @@ func main() {
 		DbName:   "baas_dev_db",
 	}
 	DB := db.NewDBConnection(dbConfig)
-<<<<<<< HEAD
-=======
 	//TODO if we not get DB service should not boot up
->>>>>>> cb617580f7e540b5109a595dbdc81d6aa6c40d39
 	jobDefinitionRepository := repositories.NewJobDefinitionRepository(DB)
 	customerSiteRepository := repositories.NewCustomerSiteRepository(DB)
 	latestJobSessionRepository := repositories.NewLatestJobSessionRepository(DB)

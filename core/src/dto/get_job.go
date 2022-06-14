@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"time"
+
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
 type GetJobDto struct {
@@ -23,15 +24,8 @@ type GetJobDto struct {
 	DsaJobDefinition     DsaJobDefinition       `json:"dsa_job_definition"`
 }
 type LastExecutionDetails struct {
-<<<<<<< HEAD
-	Status        string    `json:"status"`
-	BackupSetSize int64     `json:"backup_set_size"`
-	StartTime     time.Time `json:"start_time"`
-	EndTime       time.Time `json:"end_time"`
-=======
 	Status        string     `json:"status"`
 	BackupSetSize int64      `json:"backup_set_size"`
 	StartTime     *time.Time `json:"start_time"`
 	EndTime       *time.Time `json:"end_time"`
->>>>>>> cb617580f7e540b5109a595dbdc81d6aa6c40d39
 }
