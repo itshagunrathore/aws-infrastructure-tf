@@ -120,7 +120,7 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 		return 0, err
 	}
 
-	createDsaJobRequest := mappers.NewCreateDsaJobRequestMapper().MapToCreateDsaJobRequest(postJobDto, accountId, 0)
+	createDsaJobRequest := mappers.NewCreateDsaJobRequestMapper().MapToCreateDsaJobRequest(postJobDto, accountId, jobId, customerSite.SiteTargetType)
 	service.triggerDsaJobCreation(context, createDsaJobRequest)
 
 	log.Infow(fmt.Sprintf("job created successfully with jobId %d", jobId), "baas-trace-id", context.Value("baas-trace-id"))

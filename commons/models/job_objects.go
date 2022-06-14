@@ -3,6 +3,7 @@ package models
 import validation "github.com/go-ozzo/ozzo-validation/v4"
 
 type JobObjects struct {
+	// Todo need to check on json keys for baas and dsa of objetname and others
 	ObjectName     string           `json:"object_name"`
 	ObjectType     string           `json:"object_type"`
 	ParentName     string           `json:"parent_name"`
@@ -10,8 +11,8 @@ type JobObjects struct {
 	IncludeAll     bool             `json:"include_all"`
 	ConfigMapName  string           `json:"config_map_name,omitempty"`
 	ExcludeObjects []ExcludeObjects `json:"exclude_objects,omitempty"`
-	RenameTo       string           `json:"renameTo,omitempty"`
-	MapTo          string           `json:"mapTo,omitempty"`
+	RenameTo       string           `json:"rename_to,omitempty"`
+	MapTo          string           `json:"map_to,omitempty"`
 }
 
 func (jobObjects JobObjects) Validate() error {
@@ -25,6 +26,6 @@ func (jobObjects JobObjects) Validate() error {
 }
 
 type ExcludeObjects struct {
-	ObjectName string `json:"objectName"`
-	ObjectType string `json:"objectType"`
+	ObjectName string `json:"object_name"`
+	ObjectType string `json:"object_type"`
 }

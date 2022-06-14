@@ -67,7 +67,7 @@ func (d *dsaJobService) CreateDsaJob(context *gin.Context, request dto.CreateDsa
 
 func (d *dsaJobService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
 	systems, err := dsaDriver.SystemNames()
-
+	log.Infow("systemname call recived")
 	if err != nil {
 		return "", errors.New("no enabled system found")
 	}
@@ -79,6 +79,8 @@ func (d *dsaJobService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
 			}
 		}
 	}
+	fmt.Println("=======================================")
+	fmt.Println(enabledSystems)
 	if len(enabledSystems) > 0 {
 		return enabledSystems[0].SystemName, nil
 	}
@@ -88,7 +90,8 @@ func (d *dsaJobService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
 func (d *dsaJobService) GetTarGetGroup(dsaDriver dsa.DsaDriver, siteTargetType models.SiteTargetType) (string, error) {
 
 	targetGroups, err := dsaDriver.GetTargetGroup(siteTargetType)
-
+	fmt.Println("=======================================")
+	fmt.Println(targetGroups)
 	if err != nil {
 		return "", errors.New("error while fetching target groups")
 	}
