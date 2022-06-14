@@ -6,9 +6,11 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
-type CustomerSite struct {
+type Tenant struct {
 	CustomerName     string
 	SiteId           string
+	TenantId         string
+	PodId            string
 	CustomerSiteId   int    `gorm:"primary_key;not null;autoIncrement"`
 	ServerUuid       string `gorm:"type:uuid"`
 	SiteTargetType   models.SiteTargetType
@@ -22,6 +24,6 @@ type CustomerSite struct {
 	OfferingType     string
 }
 
-func (t *CustomerSite) TableName() string {
-	return "customer_site"
+func (t *Tenant) TableName() string {
+	return "tenant"
 }

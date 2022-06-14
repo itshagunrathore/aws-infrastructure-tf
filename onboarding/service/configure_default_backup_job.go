@@ -6,7 +6,8 @@ import (
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/models"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/utils"
 )
 
 func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (string, error) {
@@ -14,6 +15,8 @@ func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	var payload models.CreateJob
 	var backupObjects models.RestJobObjectsModels
 	var createJobResponse models.CreateJobResponse
+	barUserSecretName := fmt.Sprintf("%s_TDaaS_BAR", event.AccountId)
+	BarUserPassword, err := utils.GetSecret(barUserSecretName, event.Region, event.CloudPlatform)
 	backupObjects.IncludeAll = false
 	backupObjects.ObjectName = "DBC"
 	backupObjects.ObjectType = "DATABASE"
@@ -22,9 +25,9 @@ func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 	payload.RestJobDefinitionModel.JobName = fmt.Sprintf("%s_default_dbc_only", event.SystemName)
 	payload.RestJobDefinitionModel.JobType = "BACKUP"
 	payload.RestJobDefinitionModel.SourceSystem = event.SystemName
-	payload.RestJobDefinitionModel.SrcUserName = event.Db_user
-	payload.RestJobDefinitionModel.SrcUserPassword = event.Db_password
-	payload.RestJobDefinitionModel.TargetGroupName = "TG_BAAS_GO3"
+	payload.RestJobDefinitionModel.SrcUserName = "TDaaS_BAR"
+	payload.RestJobDefinitionModel.SrcUserPassword = BarUserPassword
+	payload.RestJobDefinitionModel.TargetGroupName = "TG_BAAS"
 	payload.RestJobObjectsModels = append(payload.RestJobObjectsModels, backupObjects)
 	payload.RestJobSettingsModel.BlockLevelCompression = "DEFAULT"
 	payload.RestJobSettingsModel.LoggingLevel = "Error"
@@ -40,10 +43,11 @@ func CreateDefaulJob(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 
 	log.Info(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/jobs", event.DscIp, event.Port)
+	log.Info("invoking dsa api: %s", url)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	if err != nil {
 		data := json.Unmarshal(response, &createJobResponse)
-		fmt.Printf("DSA output:%v", data)
+		log.Info("DSA response:%v", data)
 		StatusAWSApp.StepStatus = "Failed"
 		StatusAWSApp.StepResponse = createJobResponse.Status
 		return "Failed to configure target group", err

@@ -6,15 +6,28 @@ import (
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/models"
 )
 
+func ConfigureBackupSolution(event models.Event, StatusApp *models.DetailedStatus) (string, error) {
+	var response string
+	var err error
+	switch event.CloudPlatform {
+	case "AWS":
+		response, err = ConfigureAWSApp(event, StatusApp)
+	case "AZURE":
+		response, err = ConfigureAzureApp(event, StatusApp)
+	case "GCP":
+		response, err = ConfigureGCPApp(event, StatusApp)
+	}
+	return response, err
+}
 func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (string, error) {
 	StatusAWSApp.Step = "ConfigureBackupSolution"
 	var payload models.AwsApp
 	payload.ConfigAwsRest.AcctName = event.AwsAccountName
 	payload.ConfigAwsRest.RoleName = event.RoleName
-	mediaServers, err := StatusAWSApp.GetMedia(event)
+	mediaServers, err := GetMedia(event, StatusAWSApp)
 	if err != nil {
 		return "Failed to get Media server names", err
 	}
@@ -49,7 +62,7 @@ func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 		return string(response), err
 	}
 }
-func GetAWSApp(event models.Event, StatusGetAWSApp *models.DetailedStatus) ([]byte, error) {
+func GetApp(event models.Event, StatusGetAWSApp *models.DetailedStatus) ([]byte, error) {
 	url := fmt.Sprintf("https://%s:%s/dsa/components/backup-applications/aws-s3", event.DscIp, event.Port)
 	StatusGetAWSApp.Step = "ConfigureAWSApp"
 	response, err := dsa.GetConfigDsc(url, &StatusGetAWSApp)
@@ -66,9 +79,17 @@ func GetAWSApp(event models.Event, StatusGetAWSApp *models.DetailedStatus) ([]by
 		StatusGetAWSApp.StepResponse = getSystemResponse.Status
 		StatusGetAWSApp.Error = err
 		StatusGetAWSApp.StatusCode = 200
-		fmt.Printf("Dsa new response : %v", StatusGetAWSApp)
+		log.Info("Dsa new response : %v", StatusGetAWSApp)
 		data, _ := json.Marshal(getSystemResponse)
 		log.Info(string(data))
 		return response, err
 	}
+}
+
+func ConfigureAzureApp(event models.Event, StatusAzureApp *models.DetailedStatus) (string, error) {
+	//TODO azure code here
+}
+
+func ConfigureGCPApp(event models.Event, StatusGcpApp *models.DetailedStatus) (string, error) {
+	//TODO GCP code here
 }

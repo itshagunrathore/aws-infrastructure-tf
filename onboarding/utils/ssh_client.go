@@ -67,7 +67,7 @@ func DsmainRestart(pogIP string, tenantId string, tpaSystemId string, cloudPlatf
 	for _, cmd := range dsmainCMD {
 		connectErr, cmdErr, _ := runShellCmd(client, pogIP, cmd)
 		if connectErr != nil {
-			fmt.Printf("Error:%v", connectErr)
+			log.Info("Error:%v", connectErr)
 			return false
 		} else if cmdErr != nil {
 			msg := fmt.Sprintf("Unexpected error running the cmd '%s' to the TPA_PRIMARY system ip: %s, error: %s", cmd, pogIP, cmdErr)

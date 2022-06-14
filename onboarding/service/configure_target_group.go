@@ -37,7 +37,7 @@ func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (s
 	payload.AwsAccountName = event.AwsAccountName
 	payload.IsEnabled = true
 	payload.Region = event.Region
-	payload.TargetGroupName = "TG_BAAS_GO3"
+	payload.TargetGroupName = "TG_BAAS"
 
 	log.Info(payload)
 	url := fmt.Sprintf("https://%s:%s/dsa/components/target-groups/s3", event.DscIp, event.Port)

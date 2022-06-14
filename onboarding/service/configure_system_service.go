@@ -6,17 +6,15 @@ import (
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/utils"
 )
-
-// var StatusGetSystem models.DsaResponse
 
 func ConfigureSystem(event models.Event, StatusConfigSystem *models.DetailedStatus) (string, error) {
 	StatusConfigSystem.Step = "ConfigureSystem"
 	var payload models.DsaSystem
-	barUserSecretName := fmt.Sprintf("%s_TDaaS_BAR", event.accountId)
-	barUserPassword, err := utils.GetSecret(barUserSecretName, event.Region, event.cloudPlatform)
+	barUserSecretName := fmt.Sprintf("%s_TDaaS_BAR", event.AccountId)
+	barUserPassword, err := utils.GetSecret(barUserSecretName, event.Region, event.CloudPlatform)
 	if err != nil {
 		log.Error(err)
 		return "Failed to fetch baruser password", err
@@ -45,11 +43,11 @@ func ConfigureSystem(event models.Event, StatusConfigSystem *models.DetailedStat
 }
 
 func GetSystemName(event models.Event, StatusGetSystem *models.DetailedStatus) ([]string, error) {
-	StatusGetSystem.subStep = "GetSystemName"
+	StatusGetSystem.SubStep = "GetSystemName"
 	url := fmt.Sprintf("https://%s:%s/dsa/components/systems/teradata", event.DscIp, event.Port)
 	response, err := dsa.GetConfigDsc(url, &StatusGetSystem)
 	if err != nil {
-		fmt.Printf("\nResponse:%v\n", StatusGetSystem)
+		log.Info("\nResponse:%v\n", StatusGetSystem)
 		StatusGetSystem.StepStatus = "Failed"
 		StatusGetSystem.StepResponse = string(response)
 		StatusGetSystem.Error = err

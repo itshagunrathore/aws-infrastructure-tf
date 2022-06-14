@@ -6,8 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/response"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/service"
 )
 
@@ -32,13 +32,13 @@ func onboarding(c *gin.Context) {
 			Response.OnboardingStatus = "Failed"
 			Response.CustomerAccount = payload.AcctName
 			log.Error(Response)
-			response.SuccessResponseHandler(c, Response, Response.StatusCode)
+			response.ErrorResponseHandler(c, Response, Response.StatusCode)
 			return
 		} else {
 			Response.OnboardingStatus = "Success"
 			Response.CustomerAccount = payload.AcctName
 			log.Error(Response)
-			response.ErrorResponseHandler(c, err, Response.StatusCode)
+			response.SuccessResponseHandler(c, err, Response.StatusCode)
 			return
 		}
 	} else {
@@ -77,7 +77,7 @@ func main() {
 	log.InitiateLogger("INFO", "dev")
 	router := gin.Default()
 	router.POST("/baas-api/v1/onboard", onboarding)
-	router.GET("/baas-api/v1/reonboard/", reonboarding)
+	router.GET("/baas-api/v1/tenant-reconfigure/", reonboarding)
 	router.POST("/baas-api/v1/runjob", runjob)
 	router.Run("localhost:8080")
 }

@@ -29,7 +29,7 @@ func (c customerSiteRepository) Get(accountId string) (entities.CustomerSite, er
 	return customerSiteEntity, nil
 }
 
-func (repo customerSiteRepository) OnboardNewTenant(NewTenant entities.CustomerSite) {
+func (repo customerSiteRepository) OnboardTenant(NewTenant entities.CustomerSite) {
 	repo.DB.create(&NewTenant)
 
 }

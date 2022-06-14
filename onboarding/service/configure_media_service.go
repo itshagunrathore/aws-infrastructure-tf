@@ -4,16 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/service"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/models"
 )
 
 func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedStatus) ([]string, error) {
 	url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
+	log.Info("Invoking dsa api: %s", url)
 	response, err := dsa.GetConfigDsc(url, &StatusUpdateMedia)
 	if err != nil {
 		StatusUpdateMedia.StepResponse = "Failed to fetch media servers"
+		log.Error("Failed to get media servers: %s ", err)
 		return []string{"Failed to fetch media servers", ""}, err
 	}
 	var mediaPayload models.MediaServersConfig
@@ -29,9 +32,9 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 		for _, netmask := range media.Ips {
 			ipInfo.IPAddress = netmask.IPAddress
 			ipInfo.Netmask = "255.255.255.255"
-			fmt.Printf("\nCurrent Media ip:%v\n", ipInfo)
+			log.Info("\nCurrent Media ip:%v\n", ipInfo)
 			mediaPayload.IPInfo = append(mediaPayload.IPInfo, ipInfo)
-			fmt.Printf("\nCurrent Media payload ip:%v\n", mediaPayload.IPInfo)
+			log.Info("\nCurrent Media payload ip:%v\n", mediaPayload.IPInfo)
 			ipInfo = models.IPInfo{}
 		}
 		url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
@@ -58,7 +61,7 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 }
 
 func GetMedia(event models.Event, StatusGetMedia *models.DetailedStatus) ([]string, error) {
-	pogIps, err := dsa.GetSystemName(event, &StatusGetMedia)
+	pogIps, err := service.GetSystemName(event, &StatusGetMedia)
 
 	url := fmt.Sprintf("https://%s:%s/dsa/components/mediaservers", event.DscIp, event.Port)
 	response, err := dsa.GetConfigDsc(url, &StatusGetMedia)
