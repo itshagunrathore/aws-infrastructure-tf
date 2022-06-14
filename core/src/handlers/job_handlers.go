@@ -3,14 +3,15 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
-	validation "github.com/go-ozzo/ozzo-validation/v4"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/response"
 	"io/ioutil"
 	"net/http"
 	"reflect"
 	"strconv"
+
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/response"
 
 	"github.com/gin-gonic/gin"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
@@ -38,19 +39,24 @@ func (handler *jobHandlers) GetJob(context *gin.Context) {
 	jobId, err := strconv.Atoi(context.Param("job-id"))
 
 	if err != nil {
-		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
+		err = customerrors.NewBadRequest("job-id must be integer")
+		response.ErrorResponseHandler(context, err, http.StatusBadRequest)
 		return
 	}
 	getJobDto, err := handler.service.GetJob(context, accountId, jobId)
 
 	if err != nil {
+		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.ResourceNotFound{}) {
+			response.SuccessResponseHandler(context, nil, http.StatusNoContent)
+			return
+		}
+		err = customerrors.NewInternalServerError("failed to get job")
 		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
 		return
 	}
-
+	log.Infow(fmt.Sprintf("get job successfull for account id: %s and job-id: %d", accountId, jobId), "baas-trace-id", context.Value("baas-trace-id"))
 	response.SuccessResponseHandler(context, getJobDto, http.StatusOK)
 	return
-
 }
 
 func (handler *jobHandlers) GetAllJob(context *gin.Context) {
@@ -70,7 +76,7 @@ func (handler *jobHandlers) PostJob(context *gin.Context) {
 	if err != nil {
 		msg := fmt.Sprintf("error occured while reading request body %v", err.Error())
 		log.Errorw(msg, context.Value("baas-trace-id"))
-		err = customerrors.BadRequest(msg)
+		err = customerrors.NewBadRequest(msg)
 		response.ErrorResponseHandler(context, err, http.StatusBadRequest)
 		return
 	}
@@ -79,7 +85,7 @@ func (handler *jobHandlers) PostJob(context *gin.Context) {
 
 	if err != nil {
 		log.Errorw(fmt.Sprintf("error occured %s", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
-		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.JobAlreadyExistsError{}) {
+		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.DuplicateResourceFound{}) {
 			response.ErrorResponseHandler(context, err, http.StatusConflict)
 			return
 		}
@@ -87,12 +93,8 @@ func (handler *jobHandlers) PostJob(context *gin.Context) {
 			response.ErrorResponseHandler(context, err, http.StatusBadRequest)
 			return
 		}
-		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.ServiceError{}) {
-			response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
-			return
-		}
 		// creating a generic error here
-		err = customerrors.InternalServerError("failed to create job")
+		err = customerrors.NewInternalServerError("failed to create job")
 		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
 		return
 	}
