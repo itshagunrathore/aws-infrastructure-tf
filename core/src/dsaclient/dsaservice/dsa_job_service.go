@@ -66,8 +66,7 @@ func (d *dsaJobService) CreateDsaJob(context *gin.Context, request dto.CreateDsa
 }
 
 func (d *dsaJobService) GetSystemName(dsaDriver dsa.DsaDriver) (string, error) {
-	systems, err := dsaDriver.SystemNames()
-	log.Infow("systemname call recived")
+	systems, err := dsaDriver.GetSystemNames()
 	if err != nil {
 		return "", errors.New("no enabled system found")
 	}
