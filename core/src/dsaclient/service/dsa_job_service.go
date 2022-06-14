@@ -1,4 +1,4 @@
-package dsaservice
+package service
 
 import (
 	"errors"

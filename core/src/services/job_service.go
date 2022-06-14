@@ -6,7 +6,7 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dsaclient/dsahandlers"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dsaclient/handler"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/mappers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
@@ -144,5 +144,5 @@ func (service *jobService) checkJobAlreadyExists(accountId string, jobName strin
 
 func (service *jobService) triggerDsaJobCreation(context *gin.Context, createDsaJobRequest dto.CreateDsaJobRequest) {
 	log.Infow("Triggering dsa job creation in go routine", "baas-trace-id", context.Value("baas-trace-id"))
-	go dsahandlers.CreateDsaJobHandler(context, createDsaJobRequest)
+	go handler.CreateDsaJobHandler(context, createDsaJobRequest)
 }
