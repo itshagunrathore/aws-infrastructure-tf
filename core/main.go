@@ -2,24 +2,46 @@ package main
 
 import (
 	"fmt"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/routers"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/services"
 	"os"
-
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/models"
 )
 
 func main() {
+	// TODO parse stage from config
+	log.InitiateLogger("INFO", "dev")
+	router := web.NewRouter()
+	r := routers.NewRoute(*router)
+	dbConfig := db.DbConfig{
+		Username: "dev_admin",
+		Password: "postgre&308",
+		Port:     80,
+		Host:     "baas-rds-dev-725b87755a61c35c.elb.us-west-2.amazonaws.com",
+		DbName:   "baas_dev_db",
+	}
+	DB := db.NewDBConnection(dbConfig)
+	//TODO if we not get DB service should not boot up
+	jobDefinitionRepository := repositories.NewJobDefinitionRepository(DB)
+	customerSiteRepository := repositories.NewCustomerSiteRepository(DB)
+	latestJobSessionRepository := repositories.NewLatestJobSessionRepository(DB)
+	jobService := services.NewJobService(jobDefinitionRepository, customerSiteRepository, latestJobSessionRepository)
+	r.GetJobHandlers(jobService)
 
-	var cfg *models.Configurations
-	config.ReadConfigInto(&cfg)
-	fmt.Println(cfg)
-
-	fmt.Println("printing configuration values: ", cfg.DbConfig.Host)
-	fmt.Println(cfg.DbConfig.Username)
-	fmt.Println(cfg.DbConfig.Password)
-	fmt.Println(cfg.DbConfig.SSLEnabled)
+	router.Engine.Run()
+	//http.ListenAndServe(":8070", r)
+	//var cfg *models.Configurations
+	//config.ReadConfigInto(&cfg)
+	//fmt.Println(cfg)
+	//fmt.Println("printing configuration values: ", cfg.DbConfig.Host)
+	//fmt.Println(cfg.DbConfig.Username)
+	//fmt.Println(cfg.DbConfig.Password)
+	//fmt.Println(cfg.DbConfig.SSLEnabled)
 	// postgresDb := db.NewDBConnection(cfg.DBConfig)
-	// handlers.HandleLogging()
+	// handler.HandleLogging()
 	// services.HandleService()
 	// fmt.Printf("Running project: `%s`\n", src.ProjectName())
 

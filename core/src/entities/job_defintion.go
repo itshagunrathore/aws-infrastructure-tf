@@ -1,6 +1,10 @@
 package entities
 
-import "time"
+import (
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gorm.io/datatypes"
+	"time"
+)
 
 type retentionSource string
 
@@ -34,34 +38,37 @@ const (
 )
 
 type JobDefinition struct {
-	JobId                int       `gorm:"primary_key;not null"`
+	JobId                int       `gorm:"primary_key;not null;autoIncrement"`
 	Name                 string    `gorm:"column:job_name"`
 	UpdatedAt            time.Time `gorm:"column:time_updated"`
 	CreatedAt            time.Time `gorm:"column:time_created"`
 	Description          string
 	Status               string
-	StatusCode           string
-	StatusDetails        string
+	StatusCode           *string
+	StatusDetails        *string
 	IsDeleted            bool
 	IsHidden             bool
-	BackupSegment        string
-	DataPhase            string
+	BackupSegment        *string
+	DataPhase            *string
 	CustomerSiteId       int
-	RetentionSource      retentionSource `gorm:"not null"`
-	IsReplicationEnabled bool            `gorm:"not null"`
+	RetentionSource      models.RetentionSource `gorm:"not null"`
+	IsReplicationEnabled bool                   `gorm:"not null"`
 	IsManaged            bool
-	DeltaCount           int
-	BackupMechanism      backupMechanism
-	SourceSite           string
-	TargetSite           string
-	TargetInfoId         int
+	DeltaCount           *int
+	BackupMechanism      models.BackupMechanism
+	SourceSite           *string
+	TargetSite           *string
+	TargetInfoId         *int
 	IsActive             bool
-	JobPriority          int     `gorm:"not null"`
-	JobType              jobType `gorm:"not null"`
-	BackupType           backupType
+	JobPriority          int            `gorm:"not null"`
+	JobType              models.JobType `gorm:"not null"`
+	BackupType           models.BackupType
 	RetentionCopiesCount int
 	IsAutoAbortActive    bool `gorm:"not null"`
 	AutoAbortInMin       int  `gorm:"not null"`
+	JobObjects           datatypes.JSON
+	CustomerSite         CustomerSite     `gorm:"foreignKey:CustomerSiteId;references:CustomerSiteId"`
+	LatestJobSession     LatestJobSession `gorm:"foreignKey:JobSessionId"`
 }
 
 func (t *JobDefinition) TableName() string {

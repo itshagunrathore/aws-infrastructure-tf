@@ -1,0 +1,8 @@
+# Intellij files
+.idea/*
+*.iml
+*.idea/*
+venv/
+*venv/*
+*env/*
+*pkg/*
