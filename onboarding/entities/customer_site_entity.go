@@ -9,7 +9,7 @@ import (
 type CustomerSite struct {
 	CustomerName     string
 	SiteId           string
-	CustomerSiteId   int
+	CustomerSiteId   int    `gorm:"primary_key;not null;autoIncrement"`
 	ServerUuid       string `gorm:"type:uuid"`
 	SiteTargetType   models.SiteTargetType
 	SiteRegion       string
