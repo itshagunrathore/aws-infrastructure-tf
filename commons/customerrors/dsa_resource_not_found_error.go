@@ -8,3 +8,7 @@ type DsaResourceNotFoundError struct {
 func (e DsaResourceNotFoundError) Error() string {
 	return e.Message
 }
+func NewDsaResourceNotFoundError(msg string) DsaResourceNotFoundError {
+	return DsaResourceNotFoundError{
+		Message: msg}
+}

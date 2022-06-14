@@ -8,3 +8,8 @@ type DsaAlreadyProvisionedError struct {
 func (e DsaAlreadyProvisionedError) Error() string {
 	return e.Message
 }
+func NewDsaAlreadyProvisionedError(msg string) DsaAlreadyProvisionedError {
+	return DsaAlreadyProvisionedError{
+		Message: msg,
+	}
+}

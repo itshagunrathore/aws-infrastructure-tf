@@ -8,3 +8,8 @@ type AccountDoesntExistError struct {
 func (e AccountDoesntExistError) Error() string {
 	return e.Message
 }
+func NewAccountDoesntExistError(msg string) AccountDoesntExistError {
+	return AccountDoesntExistError{
+		Message: msg,
+	}
+}

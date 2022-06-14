@@ -8,3 +8,8 @@ type DsaAlreadyProvisionedByOtherEntityError struct {
 func (e DsaAlreadyProvisionedByOtherEntityError) Error() string {
 	return e.Message
 }
+func NewDsaAlreadyProvisionedByOtherEntityError(msg string) DsaAlreadyProvisionedByOtherEntityError {
+	return DsaAlreadyProvisionedByOtherEntityError{
+		Message: msg,
+	}
+}

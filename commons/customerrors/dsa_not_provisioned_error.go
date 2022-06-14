@@ -8,3 +8,8 @@ type DsaNotProvisionedError struct {
 func (e DsaNotProvisionedError) Error() string {
 	return e.Message
 }
+func NewDsaNotProvisionedError(msg string) DsaNotProvisionedError {
+	return DsaNotProvisionedError{
+		Message: msg,
+	}
+}
