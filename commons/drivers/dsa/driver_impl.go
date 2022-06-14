@@ -14,7 +14,6 @@ type dsaDriver struct {
 	port          string
 	userName      string
 	password      string
-	certSignature string
 	secure        bool
 	clientId      string
 	clientSecret  string
@@ -41,7 +40,8 @@ func (d *dsaDriver) GetTargetGroup(siteTargetType models.SiteTargetType) (models
 	} else if siteTargetType == models.GCP {
 		endpoint = "/dsa/components/target-groups/gcp"
 	}
-
+	fmt.Println(endpoint)
+	fmt.Println(siteTargetType)
 	url := d.getBaseUrl() + endpoint
 	resp, err := GetDsa(url)
 
@@ -66,7 +66,7 @@ func (d *dsaDriver) GetTargetGroup(siteTargetType models.SiteTargetType) (models
 
 }
 
-func (d *dsaDriver) SystemNames() (models.SystemsResponse, error) {
+func (d *dsaDriver) GetSystemNames() (models.SystemsResponse, error) {
 
 	url := d.getBaseUrl() + "/dsa/components/systems/teradata"
 	resp, err := GetDsa(url)
@@ -95,7 +95,6 @@ func (d *dsaDriver) PostJob(restJobPayload models.RestJobPayload) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(jsonString))
 	resp, err := PostDsa(url, jsonString)
 
 	if err != nil {

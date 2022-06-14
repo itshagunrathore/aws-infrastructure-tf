@@ -17,9 +17,9 @@ type RestJobDefinitionModel struct {
 	NextIncrementalRestore bool    `json:"nextIncrementalRestore,omitempty"`
 	RetireUnits            string  `json:"retireUnits,omitempty"`
 	RetireValue            int     `json:"retireValue,omitempty"`
-	SavesetAccountID       string  `json:"savesetAccountId,omitempty"`
-	SavesetPassword        string  `json:"savesetPassword,omitempty"`
-	SavesetUser            string  `json:"savesetUser,omitempty"`
+	SaveSetAccountID       string  `json:"savesetAccountId,omitempty"`
+	SaveSetPassword        string  `json:"savesetPassword,omitempty"`
+	SaveSetUser            string  `json:"savesetUser,omitempty"`
 	SourceSystem           string  `json:"sourceSystem"`
 	SrcUserAccountID       string  `json:"srcUserAccountId,omitempty"`
 	SrcUserName            string  `json:"srcUserName"`
@@ -31,17 +31,23 @@ type RestJobDefinitionModel struct {
 	TargetUserPassword     string  `json:"targetUserPassword,omitempty"`
 }
 
-//type RestJobObjectsModels struct {
-//	ConfigMapName  string           `json:"configMapName"`
-//	ExcludeObjects []ExcludeObjects `json:"excludeObjects"`
-//	IncludeAll     bool             `json:"includeAll"`
-//	MapTo          string           `json:"mapTo"`
-//	ObjectName     string           `json:"objectName"`
-//	ObjectType     string           `json:"objectType"`
-//	ParentName     string           `json:"parentName"`
-//	ParentType     string           `json:"parentType"`
-//	RenameTo       string           `json:"renameTo"`
-//}
+type RestJobObjectsModels struct {
+	ObjectName     string               `json:"objectName"`
+	ObjectType     string               `json:"objectType"`
+	ParentName     string               `json:"parentName"`
+	ParentType     string               `json:"parentType"`
+	IncludeAll     bool                 `json:"includeAll"`
+	ConfigMapName  string               `json:"configMapName"`
+	ExcludeObjects []RestExcludeObjects `json:"excludeObjects"`
+	RenameTo       string               `json:"renameTo"`
+	MapTo          string               `json:"mapTo"`
+}
+
+type RestExcludeObjects struct {
+	ObjectName string `json:"objectName"`
+	ObjectType string `json:"objectType"`
+}
+
 //type RestJobSettingsModel struct {
 //	BlockLevelCompression     string `json:"blockLevelCompression"`
 //	ConfigMapName             string `json:"configMapName"`
