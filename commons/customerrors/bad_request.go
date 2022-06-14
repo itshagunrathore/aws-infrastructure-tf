@@ -10,7 +10,7 @@ func (e BadRequest) Error() string {
 }
 func NewBadRequest(msg string) BadRequest {
 	if msg == "" {
-		msg = "resource already exists"
+		msg = "bad request"
 	}
 	return BadRequest{
 		Message: msg,
