@@ -12,6 +12,7 @@ import (
 )
 
 func main() {
+	// TODO parse stage from config
 	log.InitiateLogger("INFO", "dev")
 	router := web.NewRouter()
 	r := routers.NewRoute(*router)
@@ -20,8 +21,10 @@ func main() {
 		Password: "postgre&308",
 		Port:     80,
 		Host:     "baas-rds-dev-725b87755a61c35c.elb.us-west-2.amazonaws.com",
-		DbName:   "baas_dev_db"}
+		DbName:   "baas_dev_db",
+	}
 	DB := db.NewDBConnection(dbConfig)
+	//TODO if we not get DB service should not boot up
 	jobDefinitionRepository := repositories.NewJobDefinitionRepository(DB)
 	customerSiteRepository := repositories.NewCustomerSiteRepository(DB)
 	latestJobSessionRepository := repositories.NewLatestJobSessionRepository(DB)

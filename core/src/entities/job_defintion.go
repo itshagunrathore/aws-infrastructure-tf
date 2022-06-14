@@ -2,6 +2,7 @@ package entities
 
 import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gorm.io/datatypes"
 	"time"
 )
 
@@ -42,7 +43,7 @@ type JobDefinition struct {
 	UpdatedAt            time.Time `gorm:"column:time_updated"`
 	CreatedAt            time.Time `gorm:"column:time_created"`
 	Description          string
-	Status               *string
+	Status               string
 	StatusCode           *string
 	StatusDetails        *string
 	IsDeleted            bool
@@ -50,8 +51,8 @@ type JobDefinition struct {
 	BackupSegment        *string
 	DataPhase            *string
 	CustomerSiteId       int
-	RetentionSource      retentionSource `gorm:"not null"`
-	IsReplicationEnabled bool            `gorm:"not null"`
+	RetentionSource      models.RetentionSource `gorm:"not null"`
+	IsReplicationEnabled bool                   `gorm:"not null"`
 	IsManaged            bool
 	DeltaCount           *int
 	BackupMechanism      models.BackupMechanism
@@ -63,8 +64,9 @@ type JobDefinition struct {
 	JobType              models.JobType `gorm:"not null"`
 	BackupType           models.BackupType
 	RetentionCopiesCount int
-	IsAutoAbortActive    bool             `gorm:"not null"`
-	AutoAbortInMin       int              `gorm:"not null"`
+	IsAutoAbortActive    bool `gorm:"not null"`
+	AutoAbortInMin       int  `gorm:"not null"`
+	JobObjects           datatypes.JSON
 	CustomerSite         CustomerSite     `gorm:"foreignKey:CustomerSiteId;references:CustomerSiteId"`
 	LatestJobSession     LatestJobSession `gorm:"foreignKey:JobSessionId"`
 }

@@ -3,13 +3,15 @@ package dsaservice
 import (
 	"errors"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/dsa"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
 )
 
 type DsaJobService interface {
-	CreateDsaJob(request dto.CreateDsaJobRequest) error
+	CreateDsaJob(context *gin.Context, request dto.CreateDsaJobRequest) error
 }
 
 type dsaJobService struct {
@@ -19,13 +21,21 @@ func NewDsaService() DsaJobService {
 	return &dsaJobService{}
 }
 
-func (d *dsaJobService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
+func (d *dsaJobService) CreateDsaJob(context *gin.Context, request dto.CreateDsaJobRequest) error {
 	// TODO START DSA HERE
 	host := "tdicam2118dev00.gateway.dev.cloud.teradata.com"
 	dsaDriver := dsa.NewDsaDriver(host, "443", "", "", "", "")
 
 	systemName, err := d.GetSystemName(dsaDriver)
+	if err != nil {
+		log.Errorw(err.Error())
+		return err
+		// TODO log this error and publish msg on kafka regarding failure are return from this function and find a way to stop go routine
+	}
 	targetGroup, err := d.GetTarGetGroup(dsaDriver, request.SiteTargetType)
+	if err != nil {
+		return err
+	}
 	// TODO for antares fetch secrets from secrets manager for time being using baradmin user
 	userName := "baradmin"
 	password := "V#cbjioln0367192"
@@ -40,10 +50,13 @@ func (d *dsaJobService) CreateDsaJob(request dto.CreateDsaJobRequest) error {
 	dsaRestJobPayload.RestJobDefinitionModel.SrcUserName = userName
 	dsaRestJobPayload.RestJobDefinitionModel.SrcUserPassword = password
 	dsaRestJobPayload.RestJobSettingsModel = request.JobSettings
+	dsaRestJobPayload.RestJobSettingsModel.Online = true
 	dsaRestJobPayload.RestJobObjectsModels = request.JobObjects
-	//err = dsaDriver.PostJob(dsaRestJobPayload)
-
-	//
+	err = dsaDriver.PostJob(dsaRestJobPayload)
+	// Todo to push the status to dsa-notifications kafka topic update status accordingly in baas-db in that function create entry in latest job session
+	// status to be success
+	// kafka notification
+	// Todo to stop dsa
 	if err != nil {
 		return err
 	}

@@ -34,7 +34,6 @@ func (repo *jobDefinitionRepository) FindByAccountIdAndJobId(accountId string, j
 }
 
 func (repo *jobDefinitionRepository) Save(job entities.JobDefinition) (int, error) {
-	//TODO implement me
 	result := repo.DB.DB().Save(&job)
 
 	if result.Error != nil {

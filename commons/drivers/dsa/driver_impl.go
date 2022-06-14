@@ -53,16 +53,16 @@ func (d *dsaDriver) GetTargetGroup(siteTargetType models.SiteTargetType) (models
 		return models.TargetGroupsResponse{}, errors.New("test")
 	}
 
-	var TargetGroupsReponse models.TargetGroupsResponse
+	var TargetGroupsResponse models.TargetGroupsResponse
 	body, err := ioutil.ReadAll(resp.Body)
 
-	err = json.Unmarshal(body, &TargetGroupsReponse)
+	err = json.Unmarshal(body, &TargetGroupsResponse)
 
 	if err != nil {
 		return models.TargetGroupsResponse{}, err
 	}
 	// check for valid response
-	return TargetGroupsReponse, nil
+	return TargetGroupsResponse, nil
 
 }
 
@@ -114,23 +114,6 @@ func (d *dsaDriver) PostJob(restJobPayload models.RestJobPayload) error {
 	return errors.New("test")
 }
 
-func (d dsaDriver) getBaseUrl() string {
+func (d *dsaDriver) getBaseUrl() string {
 	return "https://" + d.host + ":" + string(d.port)
-}
-
-func (d dsaDriver) processResponse(resp *http.Response) {
-
-	var dsaResponse map[string]interface{}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(body, &dsaResponse)
-	if err != nil {
-		return
-	}
-	if !dsaResponse["valid"].(bool) {
-
-	}
-
 }
