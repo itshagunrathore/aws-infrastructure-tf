@@ -15,7 +15,7 @@ func NewRoute(r web.Router) RouterStruct {
 	return RouterStruct{r}
 }
 
-func (r *RouterStruct) GetJobHandlers(jobService services.JobService) {
+func (r *RouterStruct) GetJobHandlers(jobService services.JobService) { //rename to job handler
 
 	jobHandlers := handlers.NewJobHandler(jobService)
 	r.router.Engine.Use(middlewares.Tracer())
