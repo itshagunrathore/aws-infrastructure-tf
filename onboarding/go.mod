@@ -4,7 +4,9 @@ go 1.18
 
 require gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons v0.0.0
 
-// require gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models v0.0.0
+require gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/dsa v0.0.0
+
+require gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/repositories v0.0.0
 
 require github.com/gin-gonic/gin v1.8.0
 
@@ -12,7 +14,10 @@ require gorm.io/datatypes v1.0.6
 
 require gorm.io/gorm v1.23.4
 
+require github.com/jmespath/go-jmespath v0.4.0 // indirect
+
 require (
+	github.com/aws/aws-sdk-go v1.44.34
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -30,8 +35,8 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.21.0 // indirect
 	golang.org/x/crypto v0.0.0-20220525230936-793ad666bf5e // indirect
-	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
+	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
+	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
