@@ -34,7 +34,7 @@ func runShellCmd(client *ssh.Client, pogIP string, cmd string) (connectErr error
 func DsmainRestart(pogIP string, tenantId string, tpaSystemId string, cloudPlatform string, region string) bool {
 	dsmainCMD := []string{"cnsrun -utility 'bardsmain -s' -commands \" \" -output", "cnsrun -utility 'bardsmain' -commands \" \" -output"}
 	sshSecretName := fmt.Sprintf("pod-tenant-%s-%s_sshkey", tenantId, tpaSystemId)
-	secretKey, err := utils.GetSecret(sshSecretName, region, cloudPlatform)
+	secretKey, err := GetSecret(sshSecretName, region, cloudPlatform)
 	if err != nil {
 		log.Error(err)
 		return false
