@@ -49,7 +49,7 @@ func ConfigureAWSApp(event models.Event, StatusAWSApp *models.DetailedStatus) (s
 
 	payload.ConfigAwsRest.BucketsByRegion = append(payload.ConfigAwsRest.BucketsByRegion, S3BucketsByRegion)
 	log.Info(payload)
-	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.AwsApp)
+	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.S3App)
 	response, err := dsa.PostConfigDsc(url, payload, &StatusAWSApp)
 	json.Unmarshal(response, &configAwsAppResponse)
 	if err != nil {

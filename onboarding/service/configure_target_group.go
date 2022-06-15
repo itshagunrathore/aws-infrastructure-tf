@@ -6,7 +6,7 @@ import (
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/dsa"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/models"
 )
 
 func ConfigureTGT(event models.Event, StatusConfigTGT *models.DetailedStatus) (string, error) {

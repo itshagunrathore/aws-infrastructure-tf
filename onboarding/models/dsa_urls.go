@@ -10,7 +10,7 @@ const (
 	ConfigGcpTGT   DsaUrlString = ""
 	GetTGT         DsaUrlString = ""
 	MediaServer    DsaUrlString = "/dsa/components/mediaservers"
-	AwsApp         DsaUrlString = "/dsa/components/backup-applications/aws-s3"
+	S3App          DsaUrlString = "/dsa/components/backup-applications/aws-s3"
 	AzureApp       DsaUrlString = ""
 	GcpApp         DsaUrlString = ""
 	ConfigureJob   DsaUrlString = "/dsa/jobs"

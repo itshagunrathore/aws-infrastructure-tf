@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/utils"
 	"golang.org/x/crypto/ssh"
 )
 
