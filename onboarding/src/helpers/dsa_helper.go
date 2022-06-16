@@ -1,15 +1,12 @@
 package helpers
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/helpers"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/dtos"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/entities"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/mappers"
@@ -37,7 +34,7 @@ func NewDsaHelper() *dsaHelper {
 	return &dsaHelper{}
 }
 
-func (h *dsaHelper) CheckDsaStatus(dsaStatusResp dtos.GetDsaStatusDtos) error {
+func (h *dsaHelper) CheckDsaStatus(dsaStatusResp models.DscInstanceDetails) error {
 	// we are returning nil cause DSA is not provisoned & we got an error from get dsa status
 	// in this case we need to provision dsa
 	if dsaStatusResp.ClientName == "" {
@@ -56,81 +53,17 @@ func (h *dsaHelper) CheckDsaStatus(dsaStatusResp dtos.GetDsaStatusDtos) error {
 		return nil
 	}
 }
-func (h *dsaHelper) GetErrorMessage(resp *http.Response) (string, error) {
-	var errStruct struct{ Error string }
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	json.Unmarshal(body, &errStruct)
-	return errStruct.Error, nil
-}
-func (h *dsaHelper) GetDsaStatusHelper(resp *http.Response, accountId string) (dtos.GetDsaStatusDtos, error) {
-	var getDsaStatusDto dtos.GetDsaStatusDtos
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return getDsaStatusDto, err
-		}
-		json.Unmarshal(body, &getDsaStatusDto)
-		return getDsaStatusDto, nil
-	} else if resp.StatusCode == http.StatusNotFound {
-		return getDsaStatusDto, customerrors.NewAccountDoesntExistError(fmt.Sprintf("account %v doesnt exist", accountId))
-	} else if resp.StatusCode == http.StatusInternalServerError {
-		msg, err := h.GetErrorMessage(resp)
-		if err != nil {
-			return getDsaStatusDto, err
-		}
-		if msg == fmt.Sprintf("no dsa resource exists for account id %v", accountId) {
-			return getDsaStatusDto, customerrors.NewDsaResourceNotFoundError(fmt.Sprintf("no dsa resource exists for account id %v", accountId))
-		} else {
-			return getDsaStatusDto, errors.New(msg)
-		}
-	}
-	return getDsaStatusDto, nil
-}
-func (h *dsaHelper) DeprovisionDsaHelper(resp *http.Response, clientSessionId string) (entities.DsaClientSession, error) {
+func (h *dsaHelper) DeprovisionDsaHelper(resp []byte, statusCode int, clientSessionId string) (entities.DsaClientSession, error) {
 	var dsaClientSessionEntity entities.DsaClientSession
-
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
+	helper := helpers.NewHelper()
+	if statusCode == http.StatusOK || statusCode == http.StatusAccepted {
 		dsaClientSessionEntity = mappers.NewDsaMapper().MapDeprovisionRequestUpdate(clientSessionId)
 		return dsaClientSessionEntity, nil
-	} else if resp.StatusCode == http.StatusNotFound {
-		msg, err := h.GetErrorMessage(resp)
-		if err != nil {
-			return dsaClientSessionEntity, err
-		}
+	} else if statusCode == http.StatusNotFound {
+		msg := helper.GetErrorMessage(resp)
 		return dsaClientSessionEntity, customerrors.NewAccountDoesntExistError(msg)
 	} else {
-		msg, err := h.GetErrorMessage(resp)
-		if err != nil {
-			return dsaClientSessionEntity, err
-		}
+		msg := helper.GetErrorMessage(resp)
 		return dsaClientSessionEntity, fmt.Errorf("error deprovisioning dsa: %v", msg)
-	}
-}
-func (h *dsaHelper) ProvisionDsaHelper(resp *http.Response, accountId string, context *gin.Context) (entities.DsaClientSession, error) {
-	var provisionDsaResponseDto dtos.ProvisionDsaDtos
-	var provisionDsaEntity entities.DsaClientSession
-	mappers := mappers.NewDsaMapper()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return provisionDsaEntity, err
-	}
-	log.Infow(fmt.Sprintf("pod-account-service response, statusCode: %v, body %v", resp.StatusCode, string(body)), "baas-trace-id", context.Value("baas-trace-id"))
-
-	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusAccepted {
-		json.Unmarshal(body, &provisionDsaResponseDto)
-		provisionDsaEntity = mappers.MapProvisionDsaResponse(provisionDsaResponseDto, accountId)
-
-		return provisionDsaEntity, nil
-	} else if resp.StatusCode == http.StatusMethodNotAllowed {
-		return provisionDsaEntity, customerrors.NewDsaAlreadyProvisionedError(fmt.Sprintf("Dsa already provisioned by %v", ClientName))
-	} else {
-		msg, err := h.GetErrorMessage(resp)
-		if err != nil {
-			return provisionDsaEntity, err
-		}
-		return provisionDsaEntity, fmt.Errorf("error provisioning dsa: %v", msg)
 	}
 }

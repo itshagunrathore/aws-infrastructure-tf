@@ -3,7 +3,7 @@ package mappers
 import (
 	"time"
 
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/dtos"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/entities"
 )
 
@@ -19,7 +19,7 @@ func NewDsaMapper() *dsaRespMapper {
 	return &dsaRespMapper{}
 }
 
-func (m *dsaRespMapper) MapProvisionDsaResponse(provisionDsaResponseDto dtos.ProvisionDsaDtos, accountId string) entities.DsaClientSession {
+func (m *dsaRespMapper) MapProvisionDsaResponse(provisionDsaResponseDto models.ProvisionDsaResponseModel, accountId string) entities.DsaClientSession {
 	var dsaProvisioningDtos entities.DsaClientSession
 	dsaProvisioningDtos.ClientSessionId = provisionDsaResponseDto.ClientSessionId
 	dsaProvisioningDtos.TimeCreated = time.Now().UTC()

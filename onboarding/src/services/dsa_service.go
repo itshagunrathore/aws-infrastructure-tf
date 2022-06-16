@@ -58,14 +58,12 @@ func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string)
 	provisionDsaModel.ClientName = ClientName
 
 	podAccountService := podaccountservice.NewPodAccountService()
-	resp, err := podAccountService.ProvisionDsa(baseurl, apiPath, false, provisionDsaModel)
+	resp, err := podAccountService.ProvisionDsa(baseurl, apiPath, provisionDsaModel)
 	if err != nil {
 		return err
 	}
-	provisionDsaEntity, err := helpers.NewDsaHelper().ProvisionDsaHelper(resp, accountId, context)
-	if err != nil {
-		return err
-	}
+	provisionDsaEntity := mappers.NewDsaMapper().MapProvisionDsaResponse(resp, accountId)
+
 	return d.DsaClientSessionRepository.Post(provisionDsaEntity)
 
 }
@@ -86,13 +84,13 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 	baseurl := viper.GetString("dummyUrl")
 	podAccSvc := podaccountservice.NewPodAccountService()
 
-	resp, err := podAccSvc.DeprovisionDsa(baseurl, apiPath, false)
-	log.Info(fmt.Sprintf("Response for deprovisioning dsa: %v", resp), "baas-trace-id", context.Value("baas-trace-id"))
+	resp, statusCode, err := podAccSvc.DeprovisionDsa(baseurl, apiPath)
+	log.Info(fmt.Sprintf("Response for deprovisioning dsa: %v", statusCode), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil {
 		return err
 	}
 
-	dsaClientSessionEntityResp, err := helpers.NewDsaHelper().DeprovisionDsaHelper(resp, dsaClientSession.ClientSessionId)
+	dsaClientSessionEntityResp, err := helpers.NewDsaHelper().DeprovisionDsaHelper(resp, statusCode, dsaClientSession.ClientSessionId)
 	if err != nil {
 		return err
 	}
@@ -101,17 +99,16 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 
 }
 
-func (d *dsaService) GetDsaStatusService(context *gin.Context, accountId string) (dtos.GetDsaStatusDtos, error) {
+func (d *dsaService) GetDsaStatusService(context *gin.Context, accountId string) (models.DscInstanceDetails, error) {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
 	baseurl := viper.GetString("dummyUrl")
-	var getDsaStatusDto dtos.GetDsaStatusDtos
+	var getDsaStatus models.DscInstanceDetails
 
 	podAccSvc := podaccountservice.NewPodAccountService()
-	resp, err := podAccSvc.GetDsaStatus(baseurl, apiPath, false)
+	resp, err := podAccSvc.GetDsaStatus(baseurl, apiPath, accountId)
 	log.Info(fmt.Sprintf("Response for get dsa status: %v", resp), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil {
-		return getDsaStatusDto, err
+		return getDsaStatus, err
 	}
-	return helpers.NewDsaHelper().GetDsaStatusHelper(resp, accountId)
-
+	return resp, err
 }
