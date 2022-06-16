@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/spf13/viper"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
@@ -11,10 +10,10 @@ import (
 )
 
 func main() {
-	viper.AddConfigPath("./config")
-	viper.SetConfigName("review") // change this to dynamically set to env
-	viper.SetConfigType("json")   // Look for specific type
-	viper.ReadInConfig()
+	// viper.AddConfigPath("./config")
+	// viper.SetConfigName("review") // change this to dynamically set to env
+	// viper.SetConfigType("json")   // Look for specific type
+	// viper.ReadInConfig()
 
 	log.InitiateLogger("INFO", "dev")
 

@@ -1,9 +1,5 @@
 package dtos
 
-type ProvisionDsaDtos struct {
-	ClientName      string `json:"clientName"`
-	ClientSessionId string `json:"clientSessionId"`
-}
 type GetDsaStatusDtos struct {
 	ClientName   string `json:"clientName"`
 	Status       string `json:"status"`

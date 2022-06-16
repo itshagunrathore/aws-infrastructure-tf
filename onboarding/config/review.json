@@ -1,5 +1,5 @@
 {
-    "podAccountServiceUrl" :"http://pod-account-service.pod-account-service-rvw.svc.cluster.local:5000",
-    "dummyUrl":"http://localhost:5500"
+    "podAccountServiceUrl" :"http://pod-account-service.pod-account-service-rvw.svc.cluster.local:5000"
+    
 
 }

@@ -5,12 +5,11 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"github.com/spf13/viper"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	podaccountservice "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/pod_account_service"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/dtos"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/helpers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/mappers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/repositories"
@@ -27,7 +26,7 @@ const (
 
 type DsaService interface {
 	ProvisionDsaService(context *gin.Context, accountId string) error
-	GetDsaStatusService(context *gin.Context, accountId string) (dtos.GetDsaStatusDtos, error)
+	GetDsaStatusService(context *gin.Context, accountId string) (models.DscInstanceDetails, error)
 	DeprovisionDsaService(context *gin.Context, accountId string) error
 }
 
@@ -40,7 +39,7 @@ func NewDsaService(r repositories.DsaClientSessionRepository) *dsaService {
 }
 func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string) error {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
-	baseurl := viper.GetString("dummyUrl")
+	baseurl := config.GetConfig("dummyUrl")
 
 	// check if dsa is already provisioned
 	dsaStatusResp, err := d.GetDsaStatusService(context, accountId)
@@ -81,7 +80,7 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 
 	//input for pod-acc-svc
 	apiPath := fmt.Sprintf("/v1/accounts/%s/%s/%s/dsa", accountId, ClientName, dsaClientSession.ClientSessionId)
-	baseurl := viper.GetString("dummyUrl")
+	baseurl := config.GetConfig("dummyUrl")
 	podAccSvc := podaccountservice.NewPodAccountService()
 
 	resp, statusCode, err := podAccSvc.DeprovisionDsa(baseurl, apiPath)
@@ -101,7 +100,7 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 
 func (d *dsaService) GetDsaStatusService(context *gin.Context, accountId string) (models.DscInstanceDetails, error) {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
-	baseurl := viper.GetString("dummyUrl")
+	baseurl := config.GetConfig("dummyUrl")
 	var getDsaStatus models.DscInstanceDetails
 
 	podAccSvc := podaccountservice.NewPodAccountService()

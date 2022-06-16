@@ -23,8 +23,7 @@ const (
 
 type DsaHelper interface {
 	CheckDsaStatus(dsaStatusResp dtos.GetDsaStatusDtos) error
-	GetDsaStatusHelper(resp *http.Response, accountId string) (dtos.GetDsaStatusDtos, error)
-	GetErrorMessage(resp *http.Response) (string, error)
+	DeprovisionDsaHelper(resp []byte, statusCode int, clientSessionId string) (entities.DsaClientSession, error)
 }
 
 type dsaHelper struct {
