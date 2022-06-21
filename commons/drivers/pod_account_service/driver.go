@@ -15,7 +15,9 @@ import (
 )
 
 type PodAccountService interface {
-	ProvisionDsa(url, path string, secure bool, provisionDsaModel models.ProvisionDsaModel) ([]byte, error)
+	ProvisionDsa(path string, secure bool, provisionDsaModel models.ProvisionDsaModel) ([]byte, error)
+	GetDsaStatus(path, accountId string) (models.DscInstanceDetails, error)
+	DeprovisionDsa(path string) ([]byte, int, error)
 }
 
 type podAccountService struct {
@@ -30,7 +32,7 @@ func NewPodAccountService() *podAccountService {
 	return &podAccountService{endpoint: endpoint, httpClient: httpClient}
 }
 
-func (p *podAccountService) ProvisionDsa(url, path string, provisionDsaModel models.ProvisionDsaModel) (models.ProvisionDsaResponseModel, error) {
+func (p *podAccountService) ProvisionDsa(path string, provisionDsaModel models.ProvisionDsaModel) (models.ProvisionDsaResponseModel, error) {
 	var buf bytes.Buffer
 	var provisionDsaResponseModel models.ProvisionDsaResponseModel
 	helper := helpers.NewHelper()
@@ -38,11 +40,11 @@ func (p *podAccountService) ProvisionDsa(url, path string, provisionDsaModel mod
 	if err != nil {
 		return provisionDsaResponseModel, err
 	}
-	resp, statusCode, err := p.httpClient.Post(url+path, buf)
+	resp, statusCode, err := p.httpClient.Post(p.endpoint+path, buf)
 	if err != nil {
 		return provisionDsaResponseModel, err
 	}
-	if statusCode == http.StatusOK || statusCode == http.StatusAccepted {
+	if statusCode == http.StatusOK || statusCode == http.StatusCreated {
 		json.Unmarshal(resp, &provisionDsaResponseModel)
 		return provisionDsaResponseModel, nil
 	} else if statusCode == http.StatusMethodNotAllowed {
@@ -50,44 +52,20 @@ func (p *podAccountService) ProvisionDsa(url, path string, provisionDsaModel mod
 		return provisionDsaResponseModel, customerrors.NewDsaAlreadyProvisionedError(msg)
 	} else {
 		msg := helper.GetErrorMessage(resp)
+		fmt.Println(string(resp))
 		return provisionDsaResponseModel, fmt.Errorf("error provisioning dsa: %v", msg)
 	}
 }
 
-// func (p *podAccountService) GetAccountInfoById(accountId string) (models.AccountDetails, error) {
-// 	url := p.endpoint + "/v1/accounts/" + accountId
-// 	resp, err := p.httpClient.Get(url)
-// 	if err != nil {
-// 		return models.AccountDetails{}, err
-// 	}
-// 	var accountDetails models.AccountDetails
-// 	if err := json.Unmarshal(resp, &accountDetails); err != nil { // Parse []byte to the go struct pointer
-// 		return models.AccountDetails{}, err
-// 	}
-// 	return accountDetails, nil
-// }
-
-// func (p *podAccountService) GetDscInstanceInfo(accountId string) (models.DscInstanceDetails, error) {
-// 	url := p.endpoint + "/v1/accounts/" + accountId + "/dsa"
-// 	resp, err := p.httpClient.Get(url)
-// 	if err != nil {
-// 		return models.DscInstanceDetails{}, err
-// 	}
-// 	var dscInstanceDetails models.DscInstanceDetails
-// 	if err := json.Unmarshal(resp, &dscInstanceDetails); err != nil { // Parse []byte to the go struct pointer
-// 		return models.DscInstanceDetails{}, err
-// 	}
-// 	return dscInstanceDetails, nil
-// }
-
-func (p *podAccountService) GetDsaStatus(url, path, accountId string) (models.DscInstanceDetails, error) {
+func (p *podAccountService) GetDsaStatus(path, accountId string) (models.DscInstanceDetails, error) {
 	var getDsaStatusDto models.DscInstanceDetails
-	resp, statusCode, err := p.httpClient.Get(url + path)
+	resp, statusCode, err := p.httpClient.Get(p.endpoint + path)
+
 	if err != nil {
 		return getDsaStatusDto, err
 	}
 
-	if statusCode == http.StatusOK || statusCode == http.StatusAccepted {
+	if statusCode == http.StatusOK || statusCode == http.StatusCreated {
 		json.Unmarshal(resp, &getDsaStatusDto)
 		return getDsaStatusDto, nil
 	} else if statusCode == http.StatusNotFound {
@@ -99,11 +77,14 @@ func (p *podAccountService) GetDsaStatus(url, path, accountId string) (models.Ds
 		} else {
 			return getDsaStatusDto, errors.New(msg)
 		}
+	} else {
+		msg := helpers.NewHelper().GetErrorMessage(resp)
+		return getDsaStatusDto, errors.New(msg)
 	}
-	return getDsaStatusDto, nil
 }
-func (p *podAccountService) DeprovisionDsa(url, path string) ([]byte, int, error) {
-	resp, statusCode, err := p.httpClient.Delete(url + path)
+
+func (p *podAccountService) DeprovisionDsa(path string) ([]byte, int, error) {
+	resp, statusCode, err := p.httpClient.Delete(p.endpoint + path)
 	if err != nil {
 		return nil, 0, err
 	}

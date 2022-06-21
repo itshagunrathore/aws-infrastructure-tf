@@ -3,9 +3,12 @@ package httpClient
 import (
 	"bytes"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net/http"
 	"time"
+
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 )
 
 type HttpClient interface {
@@ -44,6 +47,7 @@ func setupHeaders(req *http.Request) {
 }
 
 func (h *httpClient) Get(url string) ([]byte, int, error) {
+	log.Info(fmt.Sprintf("Recieved GET request for endpoint: %s", url))
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, 0, err
@@ -52,7 +56,7 @@ func (h *httpClient) Get(url string) ([]byte, int, error) {
 	setupHeaders(req)
 
 	resp, err := h.client.Do(req)
-
+	log.Info(fmt.Sprintf("Response for GET request: %v", resp.StatusCode))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -69,13 +73,14 @@ func (h *httpClient) Get(url string) ([]byte, int, error) {
 }
 
 func (h *httpClient) Post(url string, request bytes.Buffer) ([]byte, int, error) {
+	log.Info(fmt.Sprintf("Recieved POST request for endpoint: %s", url))
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(request.Bytes()))
 	if err != nil {
 		return nil, 0, err
 	}
 	setupHeaders(req)
 	resp, err := h.client.Do(req)
-
+	log.Info(fmt.Sprintf("Response for POST request: %v", resp.StatusCode))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -83,17 +88,15 @@ func (h *httpClient) Post(url string, request bytes.Buffer) ([]byte, int, error)
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
-
 	if err != nil {
 		return nil, 0, err
 	}
-
 	return body, resp.StatusCode, nil
 }
 func (h *httpClient) Delete(url string, request ...bytes.Buffer) ([]byte, int, error) {
 	var req *http.Request
 	var err error
-
+	log.Info(fmt.Sprintf("Recieved DELETE request for endpoint: %s", url))
 	if len(request) == 0 {
 		req, err = h.GetDeleteRequest(url)
 		if err != nil {
@@ -108,7 +111,7 @@ func (h *httpClient) Delete(url string, request ...bytes.Buffer) ([]byte, int, e
 
 	setupHeaders(req)
 	resp, err := h.client.Do(req)
-
+	log.Info(fmt.Sprintf("Response for DELETE request: %v", resp.StatusCode))
 	if err != nil {
 		return nil, 0, err
 	}

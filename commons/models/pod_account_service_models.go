@@ -4,8 +4,8 @@ import "time"
 
 type DscInstanceDetails struct {
 	ClientName   string `json:"clientName"`
-	DsaPrivateIP string `json:"dsaPrivateIp"`
-	DsaPublicIP  string `json:"dsaPublicIp"`
+	DsaPrivateIP string `json:"dsaPrivateIp,omitempty"`
+	DsaPublicIP  string `json:"dsaPublicIp,omitempty"`
 	Status       string `json:"status"`
 	Error        string `json:"error,omitempty"`
 }
