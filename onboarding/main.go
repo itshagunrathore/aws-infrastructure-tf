@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
@@ -16,6 +17,7 @@ func main() {
 	// viper.ReadInConfig()
 
 	log.InitiateLogger("INFO", "dev")
+	config.InitConfigReader()
 
 	dbConfig := db.DbConfig{
 		Username: "dev_admin",

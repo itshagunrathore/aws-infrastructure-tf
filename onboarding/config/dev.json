@@ -10,7 +10,7 @@
     },
     "dbDriver": "localhost",
     "podAccountService": {
-      "endpoint": "http://teracloud-pod-services-pod-account-service.tc268cb7.production.pods.teracloud.ninja",
+      "endpoint": "https://teracloud-pod-services-pod-account-service.tc268cb7.production.pods.teracloud.ninja",
       "dummyUrl":"http://localhost:5500"
     }
   }

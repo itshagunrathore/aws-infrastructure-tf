@@ -38,5 +38,6 @@ func (m *dsaRespMapper) MapDeprovisionRequestUpdate(clientSessionId string) enti
 	dsaClientSessionEntity.ClientSessionId = clientSessionId
 	dsaClientSessionEntity.IsDeleted = true
 	dsaClientSessionEntity.TimeUpdated = time.Now().UTC()
+	dsaClientSessionEntity.DeprovisionedAt = time.Now().UTC()
 	return dsaClientSessionEntity
 }

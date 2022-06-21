@@ -55,7 +55,7 @@ func (h *dsaHelper) CheckDsaStatus(dsaStatusResp models.DscInstanceDetails) erro
 func (h *dsaHelper) DeprovisionDsaHelper(resp []byte, statusCode int, clientSessionId string) (entities.DsaClientSession, error) {
 	var dsaClientSessionEntity entities.DsaClientSession
 	helper := helpers.NewHelper()
-	if statusCode == http.StatusOK || statusCode == http.StatusAccepted {
+	if statusCode == http.StatusOK || statusCode == http.StatusCreated {
 		dsaClientSessionEntity = mappers.NewDsaMapper().MapDeprovisionRequestUpdate(clientSessionId)
 		return dsaClientSessionEntity, nil
 	} else if statusCode == http.StatusNotFound {

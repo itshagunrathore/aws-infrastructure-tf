@@ -5,7 +5,6 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	podaccountservice "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/pod_account_service"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
@@ -39,11 +38,9 @@ func NewDsaService(r repositories.DsaClientSessionRepository) *dsaService {
 }
 func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string) error {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
-	baseurl := config.GetConfig("dummyUrl")
-
 	// check if dsa is already provisioned
 	dsaStatusResp, err := d.GetDsaStatusService(context, accountId)
-	log.Infow(fmt.Sprintf("Response from get dsa service: %v", dsaStatusResp.Error), "baas-trace-id", context.Value("baas-trace-id"))
+	log.Infow(fmt.Sprintf("Response from get dsa service: %v", dsaStatusResp), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil && reflect.TypeOf(err) != reflect.TypeOf(customerrors.DsaResourceNotFoundError{}) {
 		return err
 	}
@@ -55,9 +52,11 @@ func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string)
 	// input for pod acc service
 	var provisionDsaModel models.ProvisionDsaModel
 	provisionDsaModel.ClientName = ClientName
+	// this should be auto populated by dsa prov api but since this is a bug we need to give the image id for dsa manually
+	provisionDsaModel.ImageId = "ami-0b81c4b0cbbf63f1a"
 
 	podAccountService := podaccountservice.NewPodAccountService()
-	resp, err := podAccountService.ProvisionDsa(baseurl, apiPath, provisionDsaModel)
+	resp, err := podAccountService.ProvisionDsa(apiPath, provisionDsaModel)
 	if err != nil {
 		return err
 	}
@@ -68,7 +67,6 @@ func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string)
 }
 
 func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId string) error {
-
 	// check and get the latest clientSessionId to deprovision for the account
 	getDsaClientSessionEntity := mappers.NewDsaMapper().MapDsaClientSessionGetRequest(accountId)
 	dsaClientSession, err := d.DsaClientSessionRepository.Get(getDsaClientSessionEntity)
@@ -80,10 +78,9 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 
 	//input for pod-acc-svc
 	apiPath := fmt.Sprintf("/v1/accounts/%s/%s/%s/dsa", accountId, ClientName, dsaClientSession.ClientSessionId)
-	baseurl := config.GetConfig("dummyUrl")
 	podAccSvc := podaccountservice.NewPodAccountService()
 
-	resp, statusCode, err := podAccSvc.DeprovisionDsa(baseurl, apiPath)
+	resp, statusCode, err := podAccSvc.DeprovisionDsa(apiPath)
 	log.Info(fmt.Sprintf("Response for deprovisioning dsa: %v", statusCode), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil {
 		return err
@@ -100,12 +97,10 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 
 func (d *dsaService) GetDsaStatusService(context *gin.Context, accountId string) (models.DscInstanceDetails, error) {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
-	baseurl := config.GetConfig("dummyUrl")
 	var getDsaStatus models.DscInstanceDetails
-
 	podAccSvc := podaccountservice.NewPodAccountService()
-	resp, err := podAccSvc.GetDsaStatus(baseurl, apiPath, accountId)
-	log.Info(fmt.Sprintf("Response for get dsa status: %v", resp), "baas-trace-id", context.Value("baas-trace-id"))
+	resp, err := podAccSvc.GetDsaStatus(apiPath, accountId)
+	log.Info(fmt.Sprintf("Response for get dsa status: %v,", resp), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil {
 		return getDsaStatus, err
 	}

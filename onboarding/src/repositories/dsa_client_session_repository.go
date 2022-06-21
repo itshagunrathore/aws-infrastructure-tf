@@ -39,7 +39,7 @@ func (d *dsaClientSessionRepository) Post(e entities.DsaClientSession) error {
 	return nil
 }
 func (d *dsaClientSessionRepository) Update(e entities.DsaClientSession) error {
-	err := d.DB.DB().Save(&e).Error
+	err := d.DB.DB().Save(&e).Where(map[string]interface{}{"client_session_id": e.ClientSessionId}).Error
 	// check if we need to commit
 	if err != nil {
 		return err
