@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"reflect"
 
@@ -29,6 +30,7 @@ func (h *dsaHandlers) ProvisionDsa(context *gin.Context) {
 	accountId := context.Param("account-id")
 	err := h.service.ProvisionDsaService(context, accountId)
 	if err != nil {
+		log.Infow(fmt.Sprintf("Error While provisioning Dsa: %v", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.DsaAlreadyProvisionedError{}) {
 			response.SuccessResponseHandler(context, "DSA is already provisioned", http.StatusMethodNotAllowed)
 			return
@@ -50,6 +52,7 @@ func (h *dsaHandlers) GetDsaStatus(context *gin.Context) {
 	accountId := context.Param("account-id")
 	resp, err := h.service.GetDsaStatusService(context, accountId)
 	if err != nil {
+		log.Infow(fmt.Sprintf("Error While getting dsa status: %v", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.AccountDoesntExistError{}) {
 			response.ErrorResponseHandler(context, err, http.StatusNotFound)
 			return
@@ -67,6 +70,7 @@ func (h *dsaHandlers) DeprovisionDsa(context *gin.Context) {
 	accountId := context.Param("account-id")
 	err := h.service.DeprovisionDsaService(context, accountId)
 	if err != nil {
+		log.Infow(fmt.Sprintf("Error While Deprovisioning Dsa: %v", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.DsaNotProvisionedError{}) {
 			response.ErrorResponseHandler(context, err, http.StatusBadRequest)
 			return
