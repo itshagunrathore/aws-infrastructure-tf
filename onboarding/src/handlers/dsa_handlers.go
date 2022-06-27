@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"fmt"
+	"errors"
 	"net/http"
 	"reflect"
 
@@ -11,6 +11,8 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/response"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/services"
 )
+
+const InternalServerError = "error ocurred while processing request"
 
 type DsaHandlers interface {
 	ProvisionDsa(context *gin.Context)
@@ -30,9 +32,9 @@ func (h *dsaHandlers) ProvisionDsa(context *gin.Context) {
 	accountId := context.Param("account-id")
 	err := h.service.ProvisionDsaService(context, accountId)
 	if err != nil {
-		log.Infow(fmt.Sprintf("Error While provisioning Dsa: %v", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
+		log.Errorw(err.Error(), "baas-trace-id", context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.DsaAlreadyProvisionedError{}) {
-			response.SuccessResponseHandler(context, "DSA is already provisioned", http.StatusMethodNotAllowed)
+			response.ErrorResponseHandler(context, errors.New("DSA is already provisioned"), http.StatusMethodNotAllowed)
 			return
 		} else if reflect.TypeOf(err) == reflect.TypeOf(customerrors.DsaIsDeployingError{}) {
 			response.ErrorResponseHandler(context, err, http.StatusConflict)
@@ -41,7 +43,7 @@ func (h *dsaHandlers) ProvisionDsa(context *gin.Context) {
 			response.ErrorResponseHandler(context, err, http.StatusConflict)
 			return
 		}
-		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
+		response.ErrorResponseHandler(context, errors.New(InternalServerError), http.StatusInternalServerError)
 		return
 	}
 	response.SuccessResponseHandler(context, "DSA provisoned Successfully", http.StatusOK)
@@ -52,7 +54,7 @@ func (h *dsaHandlers) GetDsaStatus(context *gin.Context) {
 	accountId := context.Param("account-id")
 	resp, err := h.service.GetDsaStatusService(context, accountId)
 	if err != nil {
-		log.Infow(fmt.Sprintf("Error While getting dsa status: %v", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
+		log.Errorw(err.Error(), "baas-trace-id", context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.AccountDoesntExistError{}) {
 			response.ErrorResponseHandler(context, err, http.StatusNotFound)
 			return
@@ -60,7 +62,7 @@ func (h *dsaHandlers) GetDsaStatus(context *gin.Context) {
 			response.ErrorResponseHandler(context, err, http.StatusUnprocessableEntity)
 			return
 		}
-		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
+		response.ErrorResponseHandler(context, errors.New(InternalServerError), http.StatusInternalServerError)
 		return
 	}
 	response.SuccessResponseHandler(context, resp, http.StatusOK)
@@ -70,12 +72,12 @@ func (h *dsaHandlers) DeprovisionDsa(context *gin.Context) {
 	accountId := context.Param("account-id")
 	err := h.service.DeprovisionDsaService(context, accountId)
 	if err != nil {
-		log.Infow(fmt.Sprintf("Error While Deprovisioning Dsa: %v", err.Error()), "baas-trace-id", context.Value("baas-trace-id"))
+		log.Errorw(err.Error(), "baas-trace-id", context.Value("baas-trace-id"))
 		if reflect.TypeOf(err) == reflect.TypeOf(customerrors.DsaNotProvisionedError{}) {
 			response.ErrorResponseHandler(context, err, http.StatusBadRequest)
 			return
 		}
-		response.ErrorResponseHandler(context, err, http.StatusInternalServerError)
+		response.ErrorResponseHandler(context, errors.New(InternalServerError), http.StatusInternalServerError)
 		return
 	}
 	response.SuccessResponseHandler(context, "Dsa Deprovisioned Successfully", http.StatusOK)
