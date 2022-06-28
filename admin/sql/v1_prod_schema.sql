@@ -15,7 +15,6 @@ create type retention_source as enum ('S3', 'DATA_DOMAIN')
 create table tenant
 (
 	customer_name text,
-	site_id text not null,
 	tenant_id text not null,
 	pod_id text not null,
 	customer_site_id serial not null

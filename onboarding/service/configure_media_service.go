@@ -10,14 +10,14 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/models"
 )
 
-func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedStatus) ([]string, error) {
+func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedStatus) (string, error) {
 	url := fmt.Sprintf("https://%s:%s%s", event.DscIp, event.Port, models.MediaServer)
 	log.Info("Invoking dsa api: %s", url)
 	response, err := dsa.GetConfigDsc(url, &StatusUpdateMedia)
 	if err != nil {
 		StatusUpdateMedia.StepResponse = "Failed to fetch media servers"
 		log.Error("Failed to get media servers: %s ", err)
-		return []string{"Failed to fetch media servers", ""}, err
+		return "Failed to fetch media servers", "", err
 	}
 	var mediaPayload models.MediaServersConfig
 	var mediaResponse models.MediaResponse
@@ -45,7 +45,7 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 			StatusUpdateMedia.StepResponse = mediaResponse.Status
 			StatusUpdateMedia.Error = err
 			StatusUpdateMedia.StatusCode = 500
-			return []string{"Failed to configure target group"}, err
+			return "Failed to configure target group", err
 		} else {
 			json.Unmarshal(response, &configmediaresponse)
 			log.Info(response)
@@ -57,7 +57,7 @@ func UpdateMediaServers(event models.Event, StatusUpdateMedia *models.DetailedSt
 		mediaPayload = models.MediaServersConfig{}
 	}
 	log.Info("Media server response:%v\n", mediaResponse)
-	return []string{"Media server updated"}, err
+	return "Media server updated", err
 }
 
 func GetMedia(event models.Event, StatusGetMedia *models.DetailedStatus) ([]string, error) {

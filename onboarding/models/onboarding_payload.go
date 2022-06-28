@@ -1,14 +1,5 @@
 package models
 
-type Urlstrings struct {
-	enableSystem         string `default:"/dsa/components/systems/enabling/"`
-	BackupSolution       string `default:"/dsa/components/backup-applications/aws-s3"`
-	configureTargetGroup string `default:"/dsa/components/target-groups/s3"`
-	updateMedia          string `default:"/dsa/components/mediaservers"`
-	jobs                 string `default:"/dsa/jobs"`
-	system               string `default:"/dsa/components/systems/teradata"`
-}
-
 type TgtPayload struct {
 	AwsAccountName     string               `json:"awsAccountName"`
 	IsEnabled          bool                 `json:"isEnabled"`

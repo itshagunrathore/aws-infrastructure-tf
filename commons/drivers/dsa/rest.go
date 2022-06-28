@@ -50,8 +50,8 @@ func PostConfigDsc(url string, payload interface{}, DsaStatus *models.DetailedSt
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		DsaStatus.Error = err
-		DsaStatus.StatusCode = 502
-		DsaStatus.StepResponse = "DSA Gateway Timeout"
+		DsaStatus.StatusCode = resp.StatusCode
+		DsaStatus.StepResponse = resp.Status
 		return []byte("Failed to invoke dsa api"), err
 	}
 	if resp.StatusCode != 200 {
