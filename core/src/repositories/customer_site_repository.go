@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/entities"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/onboarding/entities"
 )
 
 type CustomerSiteRepository interface {
@@ -27,4 +27,9 @@ func (c customerSiteRepository) Get(accountId string) (entities.CustomerSite, er
 		return entities.CustomerSite{}, err
 	}
 	return customerSiteEntity, nil
+}
+
+func (repo customerSiteRepository) OnboardTenant(NewTenant entities.CustomerSite) {
+	repo.DB.create(&NewTenant)
+
 }

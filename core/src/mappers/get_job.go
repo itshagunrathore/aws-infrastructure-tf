@@ -2,6 +2,7 @@ package mappers
 
 import (
 	"encoding/json"
+
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/dto"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/core/src/entities"
