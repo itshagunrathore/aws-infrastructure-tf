@@ -1,10 +1,10 @@
 package constants
 
 const (
-	ClientName         string = "baas" //
-	Running            string = "running"
-	Deploying          string = "deploying"
-	Terminating        string = "terminating"
-	ProvisionDsaPath   string = "/v1/accounts/{accountId}/dsa"
-	DeprovisionDsaPath string = "/v1/accounts/{accountId}/{clientName}/{clientSessionId}/dsa"
+	ClientName         = "baas" //
+	Running            = "running"
+	Deploying          = "deploying"
+	Terminating        = "terminating"
+	ProvisionDsaPath   = "/v1/accounts/{accountId}/dsa"
+	DeprovisionDsaPath = "/v1/accounts/{accountId}/{clientName}/{clientSessionId}/dsa"
 )

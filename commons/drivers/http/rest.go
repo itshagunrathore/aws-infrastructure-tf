@@ -46,7 +46,7 @@ func setupHeaders(req *http.Request) {
 }
 
 func (h *httpClient) Get(url string) ([]byte, int, error) {
-	// log.Infof("Recieved GET request for endpoint: %s", url)
+	log.Infof("Recieved GET request for endpoint: %s", url)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
 	if err != nil {
 		return nil, 0, err
@@ -55,13 +55,12 @@ func (h *httpClient) Get(url string) ([]byte, int, error) {
 	setupHeaders(req)
 
 	resp, err := h.client.Do(req)
-	// log.Infof("Response for GET request: %v", resp.StatusCode)
+	log.Infof("Response for GET request: %v", resp.StatusCode)
 	if err != nil {
 		return nil, 0, err
 	}
 
 	defer resp.Body.Close()
-	// need to add statusCode with body
 	body, err := io.ReadAll(resp.Body)
 
 	if err != nil {
