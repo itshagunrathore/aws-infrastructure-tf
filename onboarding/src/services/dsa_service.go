@@ -24,17 +24,17 @@ type DsaService interface {
 
 type dsaService struct {
 	DsaClientSessionRepository repositories.DsaClientSessionRepository
+	PodAccountService          podaccountservice.PodAccountService
 }
 
-func NewDsaService(r repositories.DsaClientSessionRepository) *dsaService {
-	return &dsaService{DsaClientSessionRepository: r}
+func NewDsaService(r repositories.DsaClientSessionRepository, p podaccountservice.PodAccountService) *dsaService {
+	return &dsaService{DsaClientSessionRepository: r, PodAccountService: p}
 }
 func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string) error {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
-	podAccountService := podaccountservice.NewPodAccountService()
 
 	// check if dsa is already provisioned
-	dsaStatusResp, err := podAccountService.GetDsaStatus(apiPath, accountId)
+	dsaStatusResp, err := d.PodAccountService.GetDsaStatus(apiPath, accountId)
 	log.Infow(fmt.Sprintf("Response from get dsa service: %v", dsaStatusResp), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil && reflect.TypeOf(err) != reflect.TypeOf(customerrors.DsaResourceNotFoundError{}) {
 		return err
@@ -50,7 +50,7 @@ func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string)
 	// this should be auto populated by dsa prov api but since this is a bug we need to give the image id for dsa manually
 	provisionDsaModel.ImageId = "ami-0b81c4b0cbbf63f1a"
 
-	resp, err := podAccountService.ProvisionDsa(apiPath, provisionDsaModel)
+	resp, err := d.PodAccountService.ProvisionDsa(apiPath, provisionDsaModel)
 	if err != nil {
 		return err
 	}
@@ -73,9 +73,8 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 	}
 	//input for pod-acc-svc
 	apiPath := fmt.Sprintf("/v1/accounts/%s/%s/%s/dsa", accountId, constants.ClientName, dsaClientSession.ClientSessionId)
-	podAccSvc := podaccountservice.NewPodAccountService()
 
-	resp, statusCode, err := podAccSvc.DeprovisionDsa(apiPath)
+	resp, statusCode, err := d.PodAccountService.DeprovisionDsa(apiPath)
 	log.Info(fmt.Sprintf("Response for deprovisioning dsa: %v", resp), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil {
 		return err
@@ -93,8 +92,7 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 func (d *dsaService) GetDsaStatusService(context *gin.Context, accountId string) (models.DscInstanceDetails, error) {
 	apiPath := fmt.Sprintf("/v1/accounts/%s/dsa", accountId)
 	var getDsaStatus models.DscInstanceDetails
-	podAccSvc := podaccountservice.NewPodAccountService()
-	resp, err := podAccSvc.GetDsaStatus(apiPath, accountId)
+	resp, err := d.PodAccountService.GetDsaStatus(apiPath, accountId)
 	log.Info(fmt.Sprintf("Response for get dsa status: %v,", resp), "baas-trace-id", context.Value("baas-trace-id"))
 	if err != nil {
 		return getDsaStatus, err

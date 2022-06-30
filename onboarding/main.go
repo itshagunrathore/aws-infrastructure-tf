@@ -3,6 +3,7 @@ package main
 import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/db"
+	podaccountservice "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/pod_account_service"
 	helper "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/helpers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/web"
@@ -30,8 +31,10 @@ func main() {
 	log.Info(DB)
 
 	dsaClientSessionRepository := repositories.NewDsaClientSessionRepository(DB)
-	dsaService := services.NewDsaService(dsaClientSessionRepository)
+	podAccSvc := podaccountservice.NewPodAccountService()
 	helpers := helper.NewHelper()
+	dsaService := services.NewDsaService(dsaClientSessionRepository, podAccSvc)
+
 	//routing
 	router := web.NewRouter()
 	r := routers.NewRoute(*router)

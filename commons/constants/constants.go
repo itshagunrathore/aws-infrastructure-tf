@@ -1,7 +1,7 @@
 package constants
 
 const (
-	ClientName         = "BaaSClient" //
+	ClientName         = "BaaSClient"
 	Running            = "running"
 	Deploying          = "deploying"
 	Terminating        = "terminating"

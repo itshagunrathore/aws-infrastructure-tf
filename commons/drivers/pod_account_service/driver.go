@@ -15,7 +15,7 @@ import (
 )
 
 type PodAccountService interface {
-	ProvisionDsa(path string, secure bool, provisionDsaModel models.ProvisionDsaModel) ([]byte, error)
+	ProvisionDsa(path string, provisionDsaModel models.ProvisionDsaModel) (models.ProvisionDsaResponseModel, error)
 	GetDsaStatus(path, accountId string) (models.DscInstanceDetails, error)
 	DeprovisionDsa(path string) ([]byte, int, error)
 }
@@ -25,11 +25,11 @@ type podAccountService struct {
 	httpClient httpclient.HttpClient
 }
 
-func NewPodAccountService() podAccountService {
+func NewPodAccountService() *podAccountService {
 	endpoint := config.GetConfig("podAccountService.endpoint")
 	fmt.Println("The endpoint received: ", endpoint)
 	httpClient := httpclient.NewHttpClient(false)
-	return podAccountService{endpoint: endpoint, httpClient: httpClient}
+	return &podAccountService{endpoint: endpoint, httpClient: httpClient}
 }
 
 func (p *podAccountService) ProvisionDsa(path string, provisionDsaModel models.ProvisionDsaModel) (models.ProvisionDsaResponseModel, error) {
