@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/constants"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	podaccountservice "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/pod_account_service"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/log"
@@ -13,14 +14,6 @@ import (
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/mappers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/repositories"
 	"gorm.io/gorm"
-)
-
-const (
-	ClientName         string = "baas" //
-	Running            string = "running"
-	Deploying          string = "deploying"
-	ProvisionDsaPath   string = "/v1/accounts/{accountId}/dsa"
-	DeprovisionDsaPath string = "/v1/accounts/{accountId}/{clientName}/{clientSessionId}/dsa"
 )
 
 type DsaService interface {
@@ -53,7 +46,7 @@ func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string)
 
 	// input for pod acc service
 	var provisionDsaModel models.ProvisionDsaModel
-	provisionDsaModel.ClientName = ClientName
+	provisionDsaModel.ClientName = constants.ClientName
 	// this should be auto populated by dsa prov api but since this is a bug we need to give the image id for dsa manually
 	provisionDsaModel.ImageId = "ami-0b81c4b0cbbf63f1a"
 
@@ -79,7 +72,7 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 		return err
 	}
 	//input for pod-acc-svc
-	apiPath := fmt.Sprintf("/v1/accounts/%s/%s/%s/dsa", accountId, ClientName, dsaClientSession.ClientSessionId)
+	apiPath := fmt.Sprintf("/v1/accounts/%s/%s/%s/dsa", accountId, constants.ClientName, dsaClientSession.ClientSessionId)
 	podAccSvc := podaccountservice.NewPodAccountService()
 
 	resp, statusCode, err := podAccSvc.DeprovisionDsa(apiPath)

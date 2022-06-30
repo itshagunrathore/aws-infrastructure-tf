@@ -4,21 +4,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/constants"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/helpers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/dtos"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/entities"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/onboarding/src/mappers"
-)
-
-const (
-	ClientName         string = "baas" //
-	Running            string = "running"
-	Deploying          string = "deploying"
-	Terminating        string = "terminating"
-	ProvisionDsaPath   string = "/v1/accounts/{accountId}/dsa"
-	DeprovisionDsaPath string = "/v1/accounts/{accountId}/{clientName}/{clientSessionId}/dsa"
 )
 
 type DsaHelper interface {
@@ -40,13 +32,13 @@ func (h *dsaHelper) CheckDsaStatus(dsaStatusResp models.DscInstanceDetails) erro
 		return nil
 	}
 
-	if dsaStatusResp.ClientName != ClientName {
+	if dsaStatusResp.ClientName != constants.ClientName {
 		return customerrors.NewDsaAlreadyProvisionedByOtherEntityError(fmt.Sprintf("Dsa is already provisioned by %v", dsaStatusResp.ClientName))
-	} else if dsaStatusResp.Status == Running && dsaStatusResp.ClientName == ClientName {
+	} else if dsaStatusResp.Status == constants.Running && dsaStatusResp.ClientName == constants.ClientName {
 		return customerrors.NewDsaAlreadyProvisionedError("Dsa is already provisioned")
-	} else if dsaStatusResp.Status == Deploying && dsaStatusResp.ClientName == ClientName {
+	} else if dsaStatusResp.Status == constants.Deploying && dsaStatusResp.ClientName == constants.ClientName {
 		return customerrors.NewDsaIsDeployingError("Dsa is being deployed for this account")
-	} else if dsaStatusResp.Status == Terminating && dsaStatusResp.ClientName == ClientName {
+	} else if dsaStatusResp.Status == constants.Terminating && dsaStatusResp.ClientName == constants.ClientName {
 		return customerrors.NewDsaAlreadyProvisionedError("Dsa is getting terminated")
 	} else {
 		return nil
