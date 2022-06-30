@@ -9,7 +9,7 @@ import (
 
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/config"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/customerrors"
-	httpClient "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/http"
+	httpclient "gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/drivers/http"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/helpers"
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
@@ -22,14 +22,14 @@ type PodAccountService interface {
 
 type podAccountService struct {
 	endpoint   string
-	httpClient httpClient.HttpClient
+	httpClient httpclient.HttpClient
 }
 
-func NewPodAccountService() *podAccountService {
+func NewPodAccountService() podAccountService {
 	endpoint := config.GetConfig("podAccountService.endpoint")
 	fmt.Println("The endpoint received: ", endpoint)
-	httpClient := httpClient.NewHttpClient(false)
-	return &podAccountService{endpoint: endpoint, httpClient: httpClient}
+	httpClient := httpclient.NewHttpClient(false)
+	return podAccountService{endpoint: endpoint, httpClient: httpClient}
 }
 
 func (p *podAccountService) ProvisionDsa(path string, provisionDsaModel models.ProvisionDsaModel) (models.ProvisionDsaResponseModel, error) {
