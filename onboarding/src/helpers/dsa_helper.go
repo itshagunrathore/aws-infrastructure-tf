@@ -52,7 +52,7 @@ func (h *dsaHelper) CheckDsaStatus(dsaStatusResp models.DscInstanceDetails) erro
 		return nil
 	}
 }
-func (h *dsaHelper) DeprovisionDsaHelper(resp []byte, statusCode int, clientSessionId string) (entities.DsaClientSession, error) {
+func (h *dsaHelper) HandleDeprovisioningResponse(resp []byte, statusCode int, clientSessionId string) (entities.DsaClientSession, error) {
 	var dsaClientSessionEntity entities.DsaClientSession
 	helper := helpers.NewHelper()
 	if statusCode == http.StatusOK || statusCode == http.StatusCreated {

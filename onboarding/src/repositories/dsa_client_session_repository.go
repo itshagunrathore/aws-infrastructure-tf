@@ -6,7 +6,7 @@ import (
 )
 
 type DsaClientSessionRepository interface {
-	Get(dsaClientSessionEntity entities.DsaClientSession) (entities.DsaClientSession, error)
+	GetProvisionedAccounts(dsaClientSessionEntity *entities.DsaClientSession) (entities.DsaClientSession, error)
 	Post(entities.DsaClientSession) error
 	Update(entities.DsaClientSession) error
 }
@@ -21,9 +21,9 @@ func NewDsaClientSessionRepository(DB db.PostgresDB) DsaClientSessionRepository 
 }
 
 //this will return the latest row in the database
-func (d *dsaClientSessionRepository) Get(dsaClientSessionEntity entities.DsaClientSession) (entities.DsaClientSession, error) {
+func (d *dsaClientSessionRepository) GetProvisionedAccounts(dsaClientSessionEntity *entities.DsaClientSession) (entities.DsaClientSession, error) {
 	var resp entities.DsaClientSession
-	err := d.DB.DB().Where(&dsaClientSessionEntity).Last(&resp).Error
+	err := d.DB.DB().Where("account_id = ? and is_deleted = ?", dsaClientSessionEntity.AccountId, dsaClientSessionEntity.IsDeleted).First(&resp).Error
 	if err != nil {
 		return resp, err
 	}
@@ -39,7 +39,7 @@ func (d *dsaClientSessionRepository) Post(e entities.DsaClientSession) error {
 	return nil
 }
 func (d *dsaClientSessionRepository) Update(e entities.DsaClientSession) error {
-	err := d.DB.DB().Where(map[string]interface{}{"client_session_id": e.ClientSessionId}).UpdateColumns(&e).Error
+	err := d.DB.DB().Where("client_session_id = ?", e.ClientSessionId).UpdateColumns(&e).Error
 	// check if we need to commit
 	if err != nil {
 		return err

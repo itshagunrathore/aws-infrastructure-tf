@@ -70,13 +70,14 @@ func (d *dsaService) ProvisionDsaService(context *gin.Context, accountId string)
 func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId string) error {
 	// check and get the latest clientSessionId to deprovision for the account
 	getDsaClientSessionEntity := mappers.NewDsaMapper().MapDsaClientSessionGetRequest(accountId)
-	dsaClientSession, err := d.DsaClientSessionRepository.Get(getDsaClientSessionEntity)
+	dsaClientSession, err := d.DsaClientSessionRepository.GetProvisionedAccounts(&getDsaClientSessionEntity)
+	fmt.Println(dsaClientSession.ClientSessionId)
+
 	if reflect.TypeOf(err) == reflect.TypeOf(gorm.ErrRecordNotFound) {
 		return customerrors.NewDsaNotProvisionedError("Dsa has not been provisioned for this account")
 	} else if err != nil {
 		return err
 	}
-
 	//input for pod-acc-svc
 	apiPath := fmt.Sprintf("/v1/accounts/%s/%s/%s/dsa", accountId, ClientName, dsaClientSession.ClientSessionId)
 	podAccSvc := podaccountservice.NewPodAccountService()
@@ -87,7 +88,7 @@ func (d *dsaService) DeprovisionDsaService(context *gin.Context, accountId strin
 		return err
 	}
 
-	dsaClientSessionEntityResp, err := helpers.NewDsaHelper().DeprovisionDsaHelper(resp, statusCode, dsaClientSession.ClientSessionId)
+	dsaClientSessionEntityResp, err := helpers.NewDsaHelper().HandleDeprovisioningResponse(resp, statusCode, dsaClientSession.ClientSessionId)
 	if err != nil {
 		return err
 	}
