@@ -1,9 +1,10 @@
 package entities
 
 import (
+	"time"
+
 	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"gorm.io/datatypes"
-	"time"
 )
 
 type CustomerSite struct {

@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 	"time"
+
+	"gitlab.teracloud.ninja/teracloud/pod-services/baas-spike/commons/models"
 )
 
 type GetJobDto struct {
