@@ -10,13 +10,13 @@ import (
 )
 
 type dsaDriver struct {
-	host          string
-	port          string
-	userName      string
-	password      string
-	secure        bool
-	clientId      string
-	clientSecret  string
+	host         string
+	port         string
+	userName     string
+	password     string
+	secure       bool
+	clientId     string
+	clientSecret string
 }
 
 func NewDsaDriver(host string, port string, userName string, password string, clientId string, clientSecret string) DsaDriver {

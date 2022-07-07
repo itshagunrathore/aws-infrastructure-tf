@@ -66,7 +66,7 @@ func (service *jobService) CreateJob(context *gin.Context, accountId string, pos
 	if postJobDto.BackupMechanism == models.DSA && len(postJobDto.DsaJobDefinition.JobObjects) == 0 {
 		log.Infow("job objects are not provided creating default job objects", "baas-trace-id", context.Value("baas-trace-id"))
 		defaultJobObjects := []models.JobObjects{
-			models.JobObjects{
+			{
 				ObjectName: "DBC",
 				ObjectType: "DATABASE",
 				ParentName: "",
