@@ -1,0 +1,10 @@
+dev_engine         = "postgres"
+dev_engine_version = "13.1"
+dev_db_username    = "admin"
+dev_db_password    = "Admin@123"
+dev_baas_db_name   = "baasdb"
+dev_aws_region = "us-west-2"
+dev_vpc_cidr      = ""
+dev_cidr_subnet_a = ""
+dev_cidr_subnet_b = ""
+
