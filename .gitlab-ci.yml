@@ -22,8 +22,7 @@ before_script:
 stages:
   - validate
   - plan
-#  - apply
-#  - destroy
+
 
 validate:
   stage: validate
@@ -86,3 +85,5 @@ artifacts:
 #  only:
 #    refs:
 #      - master
+#  - apply
+#  - destroy
