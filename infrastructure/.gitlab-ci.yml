@@ -5,7 +5,7 @@ image:
     - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
     - 'AWS_SECRET_ACCESS_KEY=${BAAS_AWS_SECRET_ACCESS_KEY}'
     - 'AWS_ACCESS_KEY_ID=${BAAS_AWS_ACCESS_KEY_ID}'
-    - 'AWS_ACCESS_KEY_ID=${BAAS_AWS_ACCESS_KEY_ID}'
+    - 'AWS_SESSION_TOKEN=${BAAS_AWS_SESSION_TOKEN}'
     - 'AWS_DEFAULT_REGION=${BAAS_AWS_DEFAULT_REGION}'
 
 variables:
