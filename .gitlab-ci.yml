@@ -1,55 +1,9 @@
-image:
-  name: hashicorp/terraform:light
-  entrypoint:
-    - '/usr/bin/env'
-    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-    - 'AWS_SECRET_ACCESS_KEY=${BAAS_AWS_SECRET_ACCESS_KEY}'
-    - 'AWS_ACCESS_KEY_ID=${BAAS_AWS_ACCESS_KEY_ID}'
-    - 'AWS_SESSION_TOKEN=${BAAS_AWS_SESSION_TOKEN}'
-    - 'AWS_DEFAULT_REGION=${BAAS_AWS_DEFAULT_REGION}'
-
+include:
+  # To fetch the latest template, use:
+  - template: Terraform.latest.gitlab-ci.yml
 variables:
   PLAN: plan.tfplan
-
-cache:
-  paths:
-    - .terraform
-
-before_script:
-  - terraform --version
-  - terraform init
-
-stages:
-  - validate
-  - plan
-
-
-validate:
-  stage: validate
-  script:
-    - terraform validate
-  only:
-    - branches
-
-plan:
-  stage: plan
-  script:
-    - terraform plan -out=$PLAN
-    - echo \`\`\`diff > plan.txt
-    - terraform show -no-color ${PLAN} | tee -a plan.txt
-    - echo \`\`\` >> plan.txt
-    - sed -i -e 's/  +/+/g' plan.txt
-    - sed -i -e 's/  ~/~/g' plan.txt
-    - sed -i -e 's/  -/-/g' plan.txt
-    - MESSAGE=$(cat plan.txt)
-    - >-
-      curl -X POST -g -H "PRIVATE-TOKEN: ${BAAS_GITLAB_ACCESS_TOKEN}" 
-      --data-urlencode "body=${MESSAGE}" 
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/discussions"
-artifacts:
-  name: plan
-  paths:
-    - $PLAN
-  only:
-    - merge_requests
+  TF_ROOT: Antares-baas
+  TF_CACHE_KEY: defaut
+  TF_STATE_NAME: default
 
