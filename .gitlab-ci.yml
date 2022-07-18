@@ -41,10 +41,10 @@ plan:
     - sed -i -e 's/  ~/~/g' plan.txt
     - sed -i -e 's/  -/-/g' plan.txt
     - MESSAGE=$(cat plan.txt)
-    - >-
-      curl -X POST -g -H "PRIVATE-TOKEN: ${BAAS_GITLAB_ACCESS_TOKEN}" 
-      --data-urlencode "body=${MESSAGE}" 
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/discussions"
+#    - >-
+#      curl -X POST -g -H "PRIVATE-TOKEN: ${BAAS_GITLAB_ACCESS_TOKEN}"
+#      --data-urlencode "body=${MESSAGE}"
+#      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/discussions"
 
 
 build:
