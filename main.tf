@@ -17,7 +17,7 @@ resource "aws_db_subnet_group" "baas_db_subnet_group" {
     aws_subnet.baas_vpc_pvt_subnetA.id,
     aws_subnet.baas_vpc_pvt_subnetB.id]
   tags       = {
-    Name = aws_db_subnet_group.baas_db_subnet_group.name
+    Name = var.db_subnet_group
   }
 }
 

@@ -21,7 +21,9 @@ variable "db_username" {
   sensitive   = true
 }
 
-variable "db_parameter_group" {}
+variable "db_parameter_group" {
+  default = ""
+}
 variable "db_subnet_group" {
   default = ""
 }
