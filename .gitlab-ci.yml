@@ -1,93 +1,27 @@
-#image:
-#  name: hashicorp/terraform:light
-#  entrypoint:
-#    - '/usr/bin/env'
-#    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
-#    - 'AWS_SECRET_ACCESS_KEY=${BAAS_AWS_SECRET_ACCESS_KEY}'
-#    - 'AWS_ACCESS_KEY_ID=${BAAS_AWS_ACCESS_KEY_ID}'
-#    - 'AWS_SESSION_TOKEN=${BAAS_AWS_SESSION_TOKEN}'
-#    - 'AWS_DEFAULT_REGION=${BAAS_AWS_DEFAULT_REGION}'
 include:
   - template: Terraform/Base.gitlab-ci.yml  # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Terraform/Base.gitlab-ci.yml
   - template: Jobs/SAST-IaC.gitlab-ci.yml   # https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/SAST-IaC.gitlab-ci.yml
+
+stages:
+  - validate
+  - test
+  - build
+#  - deploy
 
 fmt:
   extends: .terraform:fmt
   needs: []
 
-cache:
-  paths:
-    - .terraform
-
-before_script:
-  - terraform --version
-  - terraform init
-
-stages:
-  - validate
-  - plan
-  - test
-
 validate:
-  stage: validate
-  script:
-    - terraform validate
-  only:
-    - branches
+  extends: .terraform:validate
+  needs: []
 
-plan:
-  stage: plan
-  script:
-    - terraform plan -out=$PLAN
-    - echo \`\`\`diff > plan.txt
-    - terraform show -no-color ${PLAN} | tee -a plan.txt
-    - echo \`\`\` >> plan.txt
-    - sed -i -e 's/  +/+/g' plan.txt
-    - sed -i -e 's/  ~/~/g' plan.txt
-    - sed -i -e 's/  -/-/g' plan.txt
-    - MESSAGE=$(cat plan.txt)
-    - >-
-      curl -X POST -g -H "PRIVATE-TOKEN: ${BAAS_GITLAB_ACCESS_TOKEN}" 
-      --data-urlencode "body=${MESSAGE}" 
-      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/discussions"
-artifacts:
-  name: plan
-  paths:
-    - $PLAN
-  only:
-    - merge_requests
+build:
+  extends: .terraform:build
 
-#build:
-#  stage: plan
-#  script:
-#    - terraform plan -out=$PLAN
-#  artifacts:
-#    name: plan
-#    paths:
-#      - $PLAN
-#  only:
-#    - master
-#
-#apply:
-#  stage: apply
-#  script:
-#    - terraform apply -input=false $PLAN
+#deploy:
+#  extends: .terraform:deploy
 #  dependencies:
 #    - build
-#  when: manual
-#  only:
-#    - master
-#
-#destroy:
-#  stage: destroy
-#  script:
-#    - echo "Destroying resources"
-#    - terraform destroy -state=$STATE --auto-approve
-#  dependencies:
-#    - apply
-#  when: manual
-#  only:
-#    refs:
-#      - master
-#  - apply
-#  - destroy
+#  environment:
+#    name: $TF_STATE_NAME
