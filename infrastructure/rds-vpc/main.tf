@@ -20,8 +20,6 @@ resource "aws_db_subnet_group" "baas_db_subnet_group" {
     Name = aws_db_subnet_group.baas_db_subnet_group.name
   }
 }
-
-
 resource "aws_db_instance" "baas_db" {
   identifier           = var.baas_db_name
   instance_class       = var.instance_class

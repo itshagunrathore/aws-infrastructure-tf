@@ -21,7 +21,8 @@ cache:
 stages:
   - validate
   - plan
-#  - apply
+  - apply
+  - destroy
 
 validate:
   stage: validate
@@ -33,7 +34,6 @@ validate:
 plan:
   stage: plan
   script:
-    - echo $AWS_SECRET_ACCESS_KEY
     - echo $AWS_DEFAULT_REGION
     - terraform plan -out=$PLAN
     - echo \`\`\`diff > plan.txt
@@ -50,26 +50,26 @@ plan:
   dependencies:
     - validate
 
-#apply:
-#  stage: apply
-#  script:
-#    - terraform apply -input=false $PLAN
-#  dependencies:
-#    - build
-#  when: manual
-#  only:
-#    - master
-#
-#destroy:
-#  stage: destroy
-#  script:
-#    - echo "Destroying resources"
-#    - terraform destroy -state=$STATE --auto-approve
-#  dependencies:
-#    - apply
-#  when: manual
-#  only:
-#    refs:
-#      - master
-#  - apply
-#  - destroy
+apply:
+  stage: apply
+  script:
+    - terraform apply -input=false $PLAN
+  dependencies:
+    - plan
+  when: manual
+  only:
+    - master
+
+destroy:
+  stage: destroy
+  script:
+    - echo "Destroying resources"
+    - terraform destroy -state=$STATE --auto-approve
+  dependencies:
+    - apply
+  when: manual
+  only:
+    refs:
+      - master
+  - apply
+  - destroy
