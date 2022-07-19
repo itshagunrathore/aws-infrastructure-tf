@@ -21,8 +21,8 @@ cache:
 stages:
   - validate
   - plan
-  - apply
-  - destroy
+#  - apply
+#  - destroy
 
 validate:
   stage: validate
@@ -50,26 +50,26 @@ plan:
   dependencies:
     - validate
 
-apply:
-  stage: apply
-  script:
-    - terraform apply -input=false $PLAN
-  dependencies:
-    - plan
-  when: manual
-  only:
-    - master
-
-destroy:
-  stage: destroy
-  script:
-    - echo "Destroying resources"
-    - terraform destroy -state=$STATE --auto-approve
-  dependencies:
-    - apply
-  when: manual
-  only:
-    refs:
-      - master
-  - apply
-  - destroy
+#apply:
+#  stage: apply
+#  script:
+#    - terraform apply -input=false $PLAN
+#  dependencies:
+#    - plan
+#  when: manual
+#  only:
+#    - master
+#
+#destroy:
+#  stage: destroy
+#  script:
+#    - echo "Destroying resources"
+#    - terraform destroy -state=$STATE --auto-approve
+#  dependencies:
+#    - apply
+#  when: manual
+#  only:
+#    refs:
+#      - master
+#  - apply
+#  - destroy
