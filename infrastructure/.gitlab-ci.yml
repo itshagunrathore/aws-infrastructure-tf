@@ -1,0 +1,75 @@
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'AWS_SECRET_ACCESS_KEY=${BAAS_AWS_SECRET_ACCESS_KEY}'
+    - 'AWS_ACCESS_KEY_ID=${BAAS_AWS_ACCESS_KEY_ID}'
+    - 'AWS_SESSION_TOKEN=${BAAS_AWS_SESSION_TOKEN}'
+    - 'AWS_DEFAULT_REGION=${BAAS_AWS_DEFAULT_REGION}'
+
+before_script:
+  - terraform --version
+  - terraform init
+
+variables:
+  PLAN: plan.tfplan
+
+cache:
+  paths:
+    - .terraform
+
+stages:
+  - validate
+  - plan
+#  - apply
+#  - destroy
+
+validate:
+  stage: validate
+  script:
+    - terraform validate
+  only:
+    - branches
+
+plan:
+  stage: plan
+  script:
+    - echo $AWS_DEFAULT_REGION
+    - terraform plan -out=$PLAN
+    - echo \`\`\`diff > plan.txt
+    - terraform show -no-color ${PLAN} | tee -a plan.txt
+    - echo \`\`\` >> plan.txt
+    - sed -i -e 's/  +/+/g' plan.txt
+    - sed -i -e 's/  ~/~/g' plan.txt
+    - sed -i -e 's/  -/-/g' plan.txt
+    - MESSAGE=$(cat plan.txt)
+#    - >-
+#      curl -X POST -g -H "PRIVATE-TOKEN: ${BAAS_GITLAB_ACCESS_TOKEN}"
+#      --data-urlencode "body=${MESSAGE}"
+#      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/discussions"
+  dependencies:
+    - validate
+
+#apply:
+#  stage: apply
+#  script:
+#    - terraform apply -input=false $PLAN
+#  dependencies:
+#    - plan
+#  when: manual
+#  only:
+#    - master
+#
+#destroy:
+#  stage: destroy
+#  script:
+#    - echo "Destroying resources"
+#    - terraform destroy -state=$STATE --auto-approve
+#  dependencies:
+#    - apply
+#  when: manual
+#  only:
+#    refs:
+#      - master
+#  - apply
+#  - destroy
