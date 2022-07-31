@@ -12,6 +12,13 @@ module "subnets" {
   pvt_subnet_B_az = var.pvt_subnet_B_az
   db_subnet_group = var.db_subnet_group
 }
+data "aws_secretsmanager_secret" "password" {
+  name = "baas-db-password"
+
+}
+data "aws_secretsmanager_secret_version" "password" {
+  secret_id = data.aws_secretsmanager_secret.password
+}
 
 module "rds" {
   source               = "./modules/rds"
@@ -21,8 +28,9 @@ module "rds" {
   engine               = var.engine
   engine_version       = var.engine_version
   db_subnet_group      = var.db_subnet_group
-  db_password          = var.db_password
-  db_username          = var.db_password
+  db_password          = data.aws_secretsmanager_secret_version.password
+  db_username          = var.db_username
   db_parameter_group   = var.db_parameter_group
 }
+
 

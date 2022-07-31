@@ -19,4 +19,11 @@ resource "aws_db_instance" "baas-db" {
   parameter_group_name = aws_db_parameter_group.baas-pg.name
   publicly_accessible  = var.is_db_public
 }
+resource "random_password" "master"{
+  length           = 16
+  special          = true
+  override_special = "_!%^"
+}
+
+
 
