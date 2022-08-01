@@ -32,5 +32,3 @@ module "rds" {
   db_username          = var.db_username
   db_parameter_group   = var.db_parameter_group
 }
-
-
