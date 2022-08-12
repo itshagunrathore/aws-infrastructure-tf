@@ -8,3 +8,5 @@ venv/
 *pkg/*
 *.exe*
 .terraform/*
+*plan*
+*tfstate*

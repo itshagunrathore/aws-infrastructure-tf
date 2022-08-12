@@ -1,14 +1,14 @@
 variable "aws_region" {
-  default = ""
-  sensitive   = true
+  default   = ""
+  sensitive = true
 }
 variable "aws_secret_key" {
-  default = ""
-  sensitive   = true
+  default   = ""
+  sensitive = true
 }
 variable "aws_access_key" {
-  default = ""
-  sensitive   = true
+  default   = ""
+  sensitive = true
 }
 variable "db_password" {
   description = "RDS root user password"
@@ -25,7 +25,7 @@ variable "db_parameter_group" {
   default = ""
 }
 variable "db_subnet_group" {
-  default = ""
+
 }
 variable "engine" {
   default = ""
@@ -64,4 +64,10 @@ variable "cidr_subnet_a" {
 }
 variable "cidr_subnet_b" {
   default = "10.0.2.0/24"
+}
+
+variable "subnet_a_id" {
+
+}
+variable "subnet_b_id" {
 }

@@ -26,7 +26,7 @@ variable "log_connections_value" {
   default = 1
 }
 variable "parameter_group_family" {
-  default = "postgres"
+  default = "postgres13"
 }
 variable "db_subnet_group" {}
 variable "allocated_db_storage" {

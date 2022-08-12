@@ -1,5 +1,4 @@
-variable "db_username" {
-  description = "RDS root username"
-  type        = string
-  sensitive   = true
+
+variable "secret_string" {
+ type = map(string)
 }

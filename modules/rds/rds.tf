@@ -18,8 +18,9 @@ resource "aws_db_instance" "baas-db" {
   db_subnet_group_name = var.db_subnet_group
   parameter_group_name = aws_db_parameter_group.baas-pg.name
   publicly_accessible  = var.is_db_public
+  skip_final_snapshot  = true
 }
-resource "random_password" "master"{
+resource "random_password" "master" {
   length           = 16
   special          = true
   override_special = "_!%^"

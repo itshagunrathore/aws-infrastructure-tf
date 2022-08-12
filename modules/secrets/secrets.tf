@@ -9,10 +9,5 @@ resource "aws_secretsmanager_secret" "password" {
 }
 resource "aws_secretsmanager_secret_version" "password" {
   secret_id     = aws_secretsmanager_secret.password.id
-  secret_string = <<EOL
-  {
-    "username": var.db_username,
-    "password": random_password.master.result
-  }
-   EOL
+  secret_string = var.secret_string
 }
