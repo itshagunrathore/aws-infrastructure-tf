@@ -18,3 +18,4 @@ cidr_subnet_a          = "100.64.128.0/20"
 cidr_subnet_b          = "100.64.96.0/20"
 subnet_a_id            = "subnet-0073647952b77a71d"
 subnet_b_id            = "subnet-0a185341b241e8965"
+secret_string          = {}

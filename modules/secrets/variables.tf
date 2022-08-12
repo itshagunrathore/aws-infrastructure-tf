@@ -1,4 +1,3 @@
-
 variable "secret_string" {
- type = map(string)
+  type = map(string)
 }

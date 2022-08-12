@@ -6,8 +6,8 @@
 module "subnets" {
   source          = "./modules/subnets"
   #  vpc_id          = module.vpc.vpc_id
-  subnet_a_id   = var.subnet_a_id
-  subnet_b_id   = var.subnet_b_id
+  subnet_a_id     = var.subnet_a_id
+  subnet_b_id     = var.subnet_b_id
   db_subnet_group = var.db_subnet_group
   #  pvt_subnet_A_az = var.pvt_subnet_A_az
   #  pvt_subnet_B_az = var.pvt_subnet_B_az
@@ -18,14 +18,10 @@ module "subnets" {
   #  ]
   #  vpc_id =
 }
-
-module "secrets" {
-  source      = "./modules/secrets"
-  secret_string = {
-    username= var.db_username
-    password= module.secrets.rds_db_password
-  }
+module "utils" {
+  source = "./modules/utils"
 }
+
 module "rds" {
   source               = "./modules/rds"
   baas_db_name         = var.baas_db_name
@@ -34,7 +30,14 @@ module "rds" {
   engine               = var.engine
   engine_version       = var.engine_version
   db_subnet_group      = module.subnets.db_subnet_group
-  db_password          = module.secrets.rds_db_password
+  db_password          = module.utils.rds_db_password
   db_username          = var.db_username
   db_parameter_group   = var.db_parameter_group
+}
+module "secrets" {
+  source        = "./modules/secrets"
+  secret_string = {
+    username = var.db_username
+    password = module.utils.rds_db_password
+  }
 }

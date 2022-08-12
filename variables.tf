@@ -71,3 +71,6 @@ variable "subnet_a_id" {
 }
 variable "subnet_b_id" {
 }
+variable "secret_string" {
+  type = map(string)
+}
