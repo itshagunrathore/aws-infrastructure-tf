@@ -33,7 +33,7 @@ variable "engine" {
 variable "engine_version" {
   default = ""
 }
-variable "baas_db_name" {
+variable "db_name" {
 }
 variable "log_connections_value" {
   default = 1
