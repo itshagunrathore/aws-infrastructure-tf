@@ -24,7 +24,7 @@ module "utils" {
 
 module "rds" {
   source               = "./modules/rds"
-  baas_db_name         = var.baas_db_name
+  db_name              = var.db_name
   allocated_db_storage = var.allocated_db_storage
   instance_class       = var.instance_class
   engine               = var.engine
