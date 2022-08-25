@@ -1,18 +1,11 @@
-# Baas Spike
+# Terraform to create aws resources
+
+terraform init
+
+terraform validate
+
+terraform plan --out <outputfile>
+
+terraform apply
 
 
-## pre-commit hooks
-
-For configuring it [one-time]
-```
-pip3 install pre-commit
-
-pre-commit install
-```
-
-For running the formater/linter for all files
-```
-pre-commit run --all-files
-```
-
-Refer: [pre-commit](https://pre-commit.com/)
