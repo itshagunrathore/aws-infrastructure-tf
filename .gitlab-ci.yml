@@ -2,10 +2,10 @@ image:
   name: hashicorp/terraform:light
   entrypoint:
     - '/usr/bin/env'
-    - 'AWS_SECRET_ACCESS_KEY=${BAAS_AWS_SECRET_ACCESS_KEY}'
-    - 'AWS_ACCESS_KEY_ID=${BAAS_AWS_ACCESS_KEY_ID}'
-    - 'AWS_SESSION_TOKEN=${BAAS_AWS_SESSION_TOKEN}'
-    - 'AWS_DEFAULT_REGION=${BAAS_AWS_DEFAULT_REGION}'
+    - 'AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}'
+    - 'AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}'
+    - 'AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}'
+    - 'AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}'
 
 before_script:
   - terraform --version
@@ -43,10 +43,6 @@ plan:
     - sed -i -e 's/  ~/~/g' plan.txt
     - sed -i -e 's/  -/-/g' plan.txt
     - MESSAGE=$(cat plan.txt)
-#    - >-
-#      curl -X POST -g -H "PRIVATE-TOKEN: ${BAAS_GITLAB_ACCESS_TOKEN}"
-#      --data-urlencode "body=${MESSAGE}"
-#      "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/discussions"
   dependencies:
     - validate
 
