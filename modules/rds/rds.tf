@@ -1,4 +1,4 @@
-resource "aws_db_parameter_group" "baas-pg" {
+resource "aws_db_parameter_group" "pg" {
   name   = var.db_parameter_group
   family = var.parameter_group_family
   parameter {
@@ -7,8 +7,8 @@ resource "aws_db_parameter_group" "baas-pg" {
   }
 }
 
-resource "aws_db_instance" "baas-db" {
-  identifier           = var.baas_db_name
+resource "aws_db_instance" "db" {
+  identifier           = var.db_name
   instance_class       = var.instance_class
   allocated_storage    = var.allocated_db_storage
   engine               = var.engine
@@ -16,7 +16,7 @@ resource "aws_db_instance" "baas-db" {
   username             = var.db_username
   password             = var.db_password
   db_subnet_group_name = var.db_subnet_group
-  parameter_group_name = aws_db_parameter_group.baas-pg.name
+  parameter_group_name = aws_db_parameter_group.pg.name
   publicly_accessible  = var.is_db_public
   skip_final_snapshot  = true
 }
